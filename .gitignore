@@ -1,0 +1,10 @@
+.DS_Store
+*.*~
+*.pyc
+*.db
+*.sqlite
+.idea
+atlassian-ide-plugin.xml
+*.iml
+current_version.txt
+._.DS_Store
