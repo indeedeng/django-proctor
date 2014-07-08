@@ -85,9 +85,33 @@ class ProctorGroups(object):
             if not hasattr(self, test_name):
                 setattr(self, test_name, assignment)
 
-    def get_group_strings(self):
-        # "buttoncolortst1,countryalgotst0" is typical output for logging.
-        # Only non-negative groups are relevant for logging. -1 is inactive.
+    def get_group_string(self):
+        """
+        Return a string of comma-separated tests with bucket values.
+
+        Typically used for logging which test groups a request was part of for
+        use in A/B testing metrics.
+
+        Negative bucket values are ignored as those are considered inactive.
+
+        >>> request.proc.get_group_string()
+        "buttoncolortst1,countryalgotst0,newfeaturerollout0"
+
+        """
+        return ','.join(self.get_group_string_list())
+
+    def get_group_string_list(self):
+        """
+        Return list of group strings which are: {testname}{bucketvalue}
+
+        >>> request.proc.get_group_string_list()
+        ['buttoncolortst1', 'countryalgotst0', 'newfeaturerollout0']
+
+        See get_group_string(). This method is before joining with commas.
+
+        This method is useful if you'd like to add additional
+        non-Proctor-related groups before passing this list to your logger.
+        """
         return [test_name + str(assignment.value)
             for test_name, assignment in self._group_dict.iteritems()
             if assignment is not _UNASSIGNED_GROUP and assignment.value >= 0]
