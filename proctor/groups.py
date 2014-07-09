@@ -85,7 +85,7 @@ class ProctorGroups(object):
             if not hasattr(self, test_name):
                 setattr(self, test_name, assignment)
 
-    def get_group_string(self):
+    def __str__(self):
         """
         Return a string of comma-separated tests with bucket values.
 
