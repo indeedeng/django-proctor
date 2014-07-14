@@ -6,18 +6,54 @@ import requests
 logger = logging.getLogger('application')
 
 
-def call_proctor(api_root, context_dict, identifier_dict,
-        test_filter=None, force_groups=None, timeout=1.0):
+class ProctorParameters(object):
+    """
+    Holds all important parameters to the Proctor API.
+
+    These values are re-used in many places, especially for caching, so it's
+    useful to have them in one place instead of five separate parameters to
+    every function.
+
+    api_root: The root URL of the Proctor API. No trailing slash.
+    defined_tests: List of test names this application uses.
+    context_dict: Context variable source keys and their values.
+    identifier_dict: Identifier source keys and their values.
+    force_groups: prforceGroups string (from query param or cookie).
+    """
+    def __init__(self, api_root, defined_tests, context_dict, identifier_dict,
+            force_groups):
+        self.api_root = api_root
+        # Sometimes defined_tests is a tuple, which messes up equality testing.
+        self.defined_tests = list(defined_tests)
+        self.context_dict = context_dict
+        self.identifier_dict = identifier_dict
+        self.force_groups = force_groups
+
+    def as_dict(self):
+        return {'api_root': self.api_root,
+            'defined_tests': self.defined_tests,
+            'context_dict': self.context_dict,
+            'identifier_dict': self.identifier_dict,
+            'force_groups': self.force_groups}
+
+    def __eq__(self, other):
+        return (self.api_root == other.api_root and
+            self.defined_tests == other.defined_tests and
+            self.context_dict == other.context_dict and
+            self.identifier_dict == other.identifier_dict and
+            self.force_groups == other.force_groups)
+
+    def __ne__(self, other):
+        return not (self == other)
+
+
+def call_proctor(params, timeout=1.0):
     """
     Make an HTTP request to the Proctor REST API /groups/identify endpoint.
 
     Return the JSON API response or None if there was an error.
 
-    api_root: The root URL of the Proctor API. No trailing slash.
-    context_dict: Context variable source keys and their values.
-    identifier_dict: Identifier source keys and their values.
-    test_filter: List of test names to filter by. (default: no filter)
-    force_groups: prforceGroups string (from query param or cookie).
+    params: Instance of ProctorParameters.
     timeout: Timeout of the HTTP request in seconds. (default: 1.0 seconds)
         If None, requests will attempt the request forever.
         For network unreachable errors, requests inexplicably takes ~20x this
@@ -28,23 +64,23 @@ def call_proctor(api_root, context_dict, identifier_dict,
     starts hanging on all HTTP requests for some reason.
     """
 
-    api_url = "{root}/groups/identify".format(root=api_root)
+    api_url = "{root}/groups/identify".format(root=params.api_root)
 
-    params = {}
+    http_params = {}
     # Context variables and identifiers need prefixes.
-    params.update(('ctx.' + key, value)
-        for key, value in context_dict.iteritems())
-    params.update(('id.' + key, value)
-        for key, value in identifier_dict.iteritems())
+    http_params.update(('ctx.' + key, value)
+        for key, value in params.context_dict.iteritems())
+    http_params.update(('id.' + key, value)
+        for key, value in params.identifier_dict.iteritems())
 
     # test is a comma-separated list of test names.
-    if test_filter:
-        params['test'] = ','.join(test_filter)
-    if force_groups:
-        params['prforceGroups'] = force_groups
+    if params.defined_tests:
+        http_params['test'] = ','.join(params.defined_tests)
+    if params.force_groups:
+        http_params['prforceGroups'] = params.force_groups
 
     try:
-        response = requests.get(api_url, params=params, timeout=timeout)
+        response = requests.get(api_url, params=http_params, timeout=timeout)
 
     # Handle all possible errors.
     # This may be running in production, and Proctor is not critical,

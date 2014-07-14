@@ -23,14 +23,16 @@ class ProctorMiddleware(object):
 
         Group assignments are placed into request.proc for other Django apps.
         """
-        context = self.get_context(request)
-        identifiers = self.get_identifiers(request)
-        test_list = settings.PROCTOR_TESTS
-        force_groups = self._get_force_groups(request)
+        params = api.ProctorParameters(
+            api_root=settings.PROCTOR_API_ROOT,
+            defined_tests=settings.PROCTOR_TESTS,
+            context_dict=self.get_context(request),
+            identifier_dict=self.get_identifiers(request),
+            force_groups=self._get_force_groups(request),
+        )
 
-        api_response = api.call_proctor(settings.PROCTOR_API_ROOT,
-            context, identifiers, test_list, force_groups)
-        request.proc = groups.extract_groups(api_response, test_list)
+        api_response = api.call_proctor(params)
+        request.proc = groups.extract_groups(api_response, params.defined_tests)
 
         return None
 
