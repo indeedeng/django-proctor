@@ -32,7 +32,8 @@ class ProctorMiddleware(object):
         )
 
         api_response = api.call_proctor(params)
-        request.proc = groups.extract_groups(api_response, params.defined_tests)
+        group_dict = groups.extract_groups(api_response, params.defined_tests)
+        request.proc = groups.ProctorGroups(group_dict)
 
         return None
 

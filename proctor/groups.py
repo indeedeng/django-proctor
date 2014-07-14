@@ -119,18 +119,18 @@ class ProctorGroups(object):
 
 def extract_groups(api_response, defined_tests):
     """
-    Create and return a convenient ProctorGroups object for using test groups.
+    Create and return a dict of test name to GroupAssignment.
 
-    If api_response is None, return a ProctorGroups with None-like objects.
-    This guarantees that all defined_tests exist if the REST API had an error.
+    If api_response is None, return a dict with a None-like object for every
+    defined test. This guarantees that all defined_tests exist if the REST API
+    had an error.
 
     api_response: the JSON response from the Proctor API in Python object form.
     defined_tests: an iterable of test name strings defining the tests that
         should be available to the user. Usually from Django settings.
     """
     if api_response is None:
-        return ProctorGroups(
-            {test_name: _UNASSIGNED_GROUP for test_name in defined_tests})
+        return {test_name: _UNASSIGNED_GROUP for test_name in defined_tests}
 
     api_groups = api_response['data']['groups']
     group_dict = {}
@@ -162,4 +162,4 @@ def extract_groups(api_response, defined_tests):
             # This helps enforce program correctness.
             group_dict[test_name] = _UNASSIGNED_GROUP
 
-    return ProctorGroups(group_dict)
+    return group_dict
