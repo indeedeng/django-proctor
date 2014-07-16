@@ -1,6 +1,7 @@
 from django.conf import settings
 
 import api
+import cache
 import groups
 
 
@@ -17,6 +18,9 @@ class ProctorMiddleware(object):
     Detects 'prforceGroups' in the request and sets cookies appropriately.
     """
 
+    def __init__(self):
+        self.cacher = self.get_cacher()
+
     def process_request(self, request):
         """
         Call the Proctor API and obtain all test group assignments.
@@ -31,10 +35,17 @@ class ProctorMiddleware(object):
             force_groups=self._get_force_groups(request),
         )
 
-        api_response = api.call_proctor(params)
-        group_dict = groups.extract_groups(api_response, params.defined_tests)
-        request.proc = groups.ProctorGroups(group_dict)
+        group_dict = None
+        if self.cacher is not None:
+            group_dict = self.cacher.get(request, params)
+        if group_dict is None:
+            # Cache miss or caching disabled.
+            api_response = api.call_proctor(params)
+            group_dict = groups.extract_groups(api_response,
+                params.defined_tests)
+            self._cache_api_groups(request, group_dict, api_response, params)
 
+        request.proc = groups.ProctorGroups(group_dict)
         return None
 
     def process_response(self, request, response):
@@ -84,6 +95,9 @@ class ProctorMiddleware(object):
         """
         return False
 
+    def get_cacher(self):
+        return None
+
     def _get_force_groups(self, request):
         """
         Return the force groups string from the request after verifying it.
@@ -103,3 +117,13 @@ class ProctorMiddleware(object):
             return request.COOKIES['prforceGroups']
         else:
             return None
+
+    def _cache_api_groups(self, request, group_dict, api_response, params):
+        """
+        Attempt to update the cache with this api response.
+        """
+        if self.cacher is None or api_response is None:
+            return
+
+        self.cacher.update_matrix_version(api_response)
+        self.cacher.set(request, params, group_dict)
