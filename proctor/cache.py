@@ -4,8 +4,12 @@ Provides simple implementations of Django-based caching methods.
 Used by ProctorMiddleware to easily take advantage of caching.
 """
 
+import logging
+
 import api
 import groups
+
+logger = logging.getLogger('application.proctor.cache')
 
 
 class SessionCacher(object):
@@ -25,10 +29,12 @@ class SessionCacher(object):
         if self.seen_matrix_version is None:
             # On the first get(), we've seen no version, so we can't use the
             # cache yet.
+            logger.debug("Proctor cache MISS (first run)")
             return None
 
         proctor_key = self.get_session_dict_key()
         if proctor_key not in request.session:
+            logger.debug("Proctor cache MISS (absent)")
             return None
 
         cache_dict = request.session[proctor_key]
@@ -44,9 +50,11 @@ class SessionCacher(object):
         if valid:
             # ProctorGroups is a namedtuple serialized into a dict for JSON.
             # Need to convert it back before returning.
+            logger.debug("Proctor cache HIT")
             return {key: groups.GroupAssignment(*val)
                 for key, val in group_dict.iteritems()}
         else:
+            logger.debug("Proctor cache MISS (invalidated)")
             del request.session[proctor_key]
             return None
 
@@ -65,6 +73,7 @@ class SessionCacher(object):
         cache_dict['params'] = params.as_dict()
         cache_dict['matrix_version'] = self.seen_matrix_version
         request.session[self.get_session_dict_key()] = cache_dict
+        logger.debug("Proctor cache SET")
 
     def update_matrix_version(self, api_response):
         """
@@ -76,7 +85,10 @@ class SessionCacher(object):
         changes.
         """
         version = api_response['data']['audit']['version']
-        self.seen_matrix_version = version
+
+        if self.seen_matrix_version != version:
+            logger.info("Proctor test matrix version changed to %d.", version)
+            self.seen_matrix_version = version
 
     def get_session_dict_key(self):
         """Return the key used for the request.session dict."""

@@ -3,7 +3,7 @@ import socket
 
 import requests
 
-logger = logging.getLogger('application')
+logger = logging.getLogger('application.proctor.api')
 
 
 class ProctorParameters(object):
@@ -80,6 +80,7 @@ def call_proctor(params, timeout=1.0):
         http_params['prforceGroups'] = params.force_groups
 
     try:
+        logger.debug("Calling Proctor API: %s with %s", api_url, http_params)
         response = requests.get(api_url, params=http_params, timeout=timeout)
 
     # Handle all possible errors.
