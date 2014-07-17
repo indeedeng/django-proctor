@@ -1,4 +1,5 @@
 from django.conf import settings
+from django.core.exceptions import ImproperlyConfigured
 
 import api
 import cache
@@ -96,7 +97,19 @@ class ProctorMiddleware(object):
         return False
 
     def get_cacher(self):
-        return None
+        """
+        Create a cacher based on the PROCTOR_CACHE_METHOD Django setting.
+        """
+        cache_method = getattr(settings, 'PROCTOR_CACHE_METHOD', None)
+
+        if cache_method is None:
+            return None
+        elif cache_method == 'session':
+            return cache.SessionCacher()
+        else:
+            raise ImproperlyConfigured(
+                "{0} is an unrecognized PROCTOR_CACHE_METHOD.".format(
+                    cache_method))
 
     def _get_force_groups(self, request):
         """
