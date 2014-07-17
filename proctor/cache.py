@@ -12,9 +12,13 @@ import groups
 logger = logging.getLogger('application.proctor.cache')
 
 
-class SessionCacher(object):
+class Cacher(object):
     """
-    Cache Proctor assigned groups in the session.
+    Interface for caching implementations for Proctor assigned groups.
+
+    Implementations must override several methods that manipulate cache_dict.
+    cache_dict is an arbitrary dictionary that contains group assignments as
+    well as information that Cacher needs to detect invalidation conditions.
     """
     def __init__(self):
         self.seen_matrix_version = None
@@ -32,12 +36,11 @@ class SessionCacher(object):
             logger.debug("Proctor cache MISS (first run)")
             return None
 
-        proctor_key = self.get_session_dict_key()
-        if proctor_key not in request.session:
+        cache_dict = self._get_cache_dict(request, params)
+        if cache_dict is None:
             logger.debug("Proctor cache MISS (absent)")
             return None
 
-        cache_dict = request.session[proctor_key]
         group_dict = cache_dict['group_dict']
         cache_params = api.ProctorParameters(**cache_dict['params'])
         matrix_version = cache_dict['matrix_version']
@@ -55,7 +58,7 @@ class SessionCacher(object):
                 for key, val in group_dict.iteritems()}
         else:
             logger.debug("Proctor cache MISS (invalidated)")
-            del request.session[proctor_key]
+            self._del_cache_dict(request, params)
             return None
 
     def set(self, request, params, group_dict):
@@ -72,7 +75,8 @@ class SessionCacher(object):
         cache_dict['group_dict'] = group_dict
         cache_dict['params'] = params.as_dict()
         cache_dict['matrix_version'] = self.seen_matrix_version
-        request.session[self.get_session_dict_key()] = cache_dict
+
+        self._set_cache_dict(request, params, cache_dict)
         logger.debug("Proctor cache SET")
 
     def update_matrix_version(self, api_response):
@@ -90,7 +94,40 @@ class SessionCacher(object):
             logger.info("Proctor test matrix version changed to %d.", version)
             self.seen_matrix_version = version
 
-    def get_session_dict_key(self):
+    def _get_cache_dict(self, request, params):
+        """
+        Return the cache_dict that corresponds to ProctorParameters.
+        """
+        raise NotImplementedError("_get_cache_dict() must be overridden.")
+
+    def _set_cache_dict(self, request, params, cache_dict):
+        """
+        Set cache_dict in the cache entry corresponding to ProctorParameters.
+        """
+        raise NotImplementedError("_set_cache_dict() must be overridden.")
+
+    def _del_cache_dict(self, request, params):
+        """
+        Delete the cache entry corresponding to ProctorParameters.
+        """
+        raise NotImplementedError("_del_cache_dict() must be overridden.")
+
+
+class SessionCacher(Cacher):
+    """
+    Cache Proctor assigned groups in the Django session.
+    """
+
+    def _get_cache_dict(self, request, params):
+        return request.session.get(self._get_session_dict_key())
+
+    def _set_cache_dict(self, request, params, cache_dict):
+        request.session[self._get_session_dict_key()] = cache_dict
+
+    def _del_cache_dict(self, request, params):
+        del request.session[self._get_session_dict_key()]
+
+    def _get_session_dict_key(self):
         """Return the key used for the request.session dict."""
         return 'proctorcache'
 
