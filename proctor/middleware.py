@@ -106,6 +106,9 @@ class ProctorMiddleware(object):
             return None
         elif cache_method == 'session':
             return cache.SessionCacher()
+        elif cache_method == 'cache':
+            cache_name = getattr(settings, 'PROCTOR_CACHE_NAME', None)
+            return cache.CacheCacher(cache_name)
         else:
             raise ImproperlyConfigured(
                 "{0} is an unrecognized PROCTOR_CACHE_METHOD.".format(

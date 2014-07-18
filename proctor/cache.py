@@ -5,6 +5,9 @@ Used by ProctorMiddleware to easily take advantage of caching.
 """
 
 import logging
+import string
+
+import django.core.cache
 
 import api
 import groups
@@ -130,6 +133,60 @@ class SessionCacher(Cacher):
     def _get_session_dict_key(self):
         """Return the key used for the request.session dict."""
         return 'proctorcache'
+
+
+class CacheCacher(Cacher):
+    """
+    Cache Proctor assigned groups using Django's cache framework.
+
+    To determine the cache key, the cacher combines all the identifiers
+    together. This is likely to stay the same across requests.
+
+    If you run into CacheKeyWarnings due to length, you may need to subclass
+    this and use a different cache key strategy, like using only one identifier
+    or using a hash().
+
+    CacheCacher uses the timeout from your Django settings (5 min by default).
+    But Cacher handles cache invalidation well, so you can increase this to
+    as long as forever if you want.
+    """
+
+    # Memcached disallows spaces, newlines, etc. It treats colons specially
+    # for stats, and we use pipes to separate identifiers.
+    _VALID_KEY_CHARS = (
+        frozenset(string.ascii_letters + string.digits + string.punctuation) -
+        frozenset(':|')
+    )
+
+    def __init__(self, cache_name=None):
+        super(CacheCacher, self).__init__()
+        cache_name = cache_name or 'default'
+        self.cache = django.core.cache.get_cache(cache_name)
+
+    def _get_cache_dict(self, request, params):
+        return self.cache.get(self._get_cache_key(params))
+
+    def _set_cache_dict(self, request, params, cache_dict):
+        self.cache.set(self._get_cache_key(params), cache_dict)
+
+    def _del_cache_dict(self, request, params):
+        self.cache.delete(self._get_cache_key(params))
+
+    def _get_cache_key(self, params):
+        prefix = self._get_cache_prefix()
+        ident_dict = params.identifier_dict
+
+        # Sort values by identifier name (must be consistent).
+        idents = (str(value) for key, value in sorted(ident_dict.items()))
+        # Get rid of bad control characters like spaces.
+        # And concatenate ids with pipes (for sanity when debugging caching).
+        filtered_id_string = '|'.join(
+            ''.join(char for char in ident if char in self._VALID_KEY_CHARS)
+            for ident in idents)
+        return ':'.join([prefix, filtered_id_string])
+
+    def _get_cache_prefix(self):
+        return 'proc'
 
 
 class VersionUpdateError(RuntimeError):
