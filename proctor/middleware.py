@@ -3,7 +3,7 @@ from django.core.exceptions import ImproperlyConfigured
 
 import api
 import cache
-import groups
+import identify
 
 
 class ProctorMiddleware(object):
@@ -36,17 +36,9 @@ class ProctorMiddleware(object):
             force_groups=self._get_force_groups(request),
         )
 
-        group_dict = None
-        if self.cacher is not None:
-            group_dict = self.cacher.get(request, params)
-        if group_dict is None:
-            # Cache miss or caching disabled.
-            api_response = api.call_proctor(params)
-            group_dict = groups.extract_groups(api_response,
-                params.defined_tests)
-            self._cache_api_groups(request, group_dict, api_response, params)
+        request.proc = identify.identify_groups(
+            params, cacher=self.cacher, request=request)
 
-        request.proc = groups.ProctorGroups(group_dict)
         return None
 
     def process_response(self, request, response):
@@ -133,13 +125,3 @@ class ProctorMiddleware(object):
             return request.COOKIES['prforceGroups']
         else:
             return None
-
-    def _cache_api_groups(self, request, group_dict, api_response, params):
-        """
-        Attempt to update the cache with this api response.
-        """
-        if self.cacher is None or api_response is None:
-            return
-
-        self.cacher.update_matrix_version(api_response)
-        self.cacher.set(request, params, group_dict)
