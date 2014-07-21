@@ -37,7 +37,7 @@ class ProctorMiddleware(object):
         )
 
         request.proc = identify.identify_groups(
-            params, cacher=self.cacher, request=request)
+            params, cacher=self.cacher, request=request, lazy=self.is_lazy())
 
         return None
 
@@ -105,6 +105,9 @@ class ProctorMiddleware(object):
             raise ImproperlyConfigured(
                 "{0} is an unrecognized PROCTOR_CACHE_METHOD.".format(
                     cache_method))
+
+    def is_lazy(self):
+        return getattr(settings, 'PROCTOR_LAZY', False)
 
     def _get_force_groups(self, request):
         """

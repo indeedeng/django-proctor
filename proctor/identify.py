@@ -1,8 +1,9 @@
 import api
 import groups
+import lazy as lazy_groups
 
 
-def identify_groups(params, cacher=None, request=None):
+def identify_groups(params, cacher=None, request=None, lazy=False):
     """
     Identify the groups associated with the params and return ProctorGroups.
 
@@ -12,6 +13,9 @@ def identify_groups(params, cacher=None, request=None):
         Reduces the number of HTTP requests to the Proctor API. (default: None)
     request: The Django request. Only used if cacher is a cache.SessionCacher.
         (default: None)
+    lazy: A bool indicating whether group assignment should be lazy. If True,
+        cache lookup and HTTP requests to the Proctor API are delayed until
+        the group assignments are accessed for the first time. (default: False)
 
     You can access test group assignments through the dot operator on the
     returned ProctorGroups:
@@ -21,7 +25,10 @@ def identify_groups(params, cacher=None, request=None):
 
     See groups.py or the README for more details.
     """
-    return groups.ProctorGroups(load_group_dict(params, cacher, request))
+    if lazy:
+        return lazy_groups.LazyProctorGroups(params, cacher, request)
+    else:
+        return groups.ProctorGroups(load_group_dict(params, cacher, request))
 
 
 def load_group_dict(params, cacher=None, request=None):
