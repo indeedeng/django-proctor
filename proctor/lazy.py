@@ -20,16 +20,22 @@ class LazyProctorGroups(groups.ProctorGroups):
         super(LazyProctorGroups, self).__init__(group_dict)
 
     def get_group_string_list(self):
+        # group_dict must be really loaded before we read it.
         self.load()
         return super(LazyProctorGroups, self).get_group_string_list()
 
     def load(self):
+        """
+        Replace lazy group_dict and attributes with real group assignments.
+        """
         if self.loaded:
             # Don't double-load.
             return
 
         self._group_dict = identify.load_group_dict(
             self._params, self._cacher, self._request)
+
+        # Replace lazy attributes with loaded group assignments.
         for test_name, assignment in self._group_dict.iteritems():
             # Don't overwrite anything we don't mean to.
             if isinstance(getattr(self, test_name), LazyGroupAssignment):
