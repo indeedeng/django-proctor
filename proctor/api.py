@@ -74,8 +74,9 @@ def call_proctor(params, timeout=1.0):
         for key, value in params.identifier_dict.iteritems())
 
     # test is a comma-separated list of test names.
-    if params.defined_tests:
-        http_params['test'] = ','.join(params.defined_tests)
+    # Always provide test. If not provided, Pipet returns all matrix tests.
+    http_params['test'] = ','.join(params.defined_tests)
+
     if params.force_groups:
         http_params['prforceGroups'] = params.force_groups
 
