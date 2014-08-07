@@ -94,7 +94,7 @@ class Cacher(object):
         version = api_response['data']['audit']['version']
 
         if self.seen_matrix_version != version:
-            logger.info("Proctor test matrix version changed to %d.", version)
+            logger.info("Proctor test matrix version changed to %s.", version)
             self.seen_matrix_version = version
 
     def _get_cache_dict(self, request, params):
