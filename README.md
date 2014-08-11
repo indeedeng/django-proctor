@@ -23,5 +23,23 @@ else:
     bar()
 ```
 
+## Configuration
+
+### Middleware
+
+### Context Processor
+
+### PROCTOR_TESTS
+
+### PROCTOR_API_ROOT
+
+### PROCTOR_CACHE_METHOD
+
+### PROCTOR_CACHE_NAME
+
+### PROCTOR_LAZY
+
+## Usage
+
 TODO: intro, can be used in other frameworks, required config options,
 basic usage, etc.
