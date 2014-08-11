@@ -6,7 +6,7 @@ import cache
 import identify
 
 
-class ProctorMiddleware(object):
+class BaseProctorMiddleware(object):
     """
     Middleware that gets all Proctor test group assignments via the REST API.
 
