@@ -341,5 +341,6 @@ http://django.example.com/?prforceGroups=
 
 The tests and bucket values specified in `prforceGroups` must exist in the Proctor test matrix.
 
-TODO: intro, can be used in other frameworks, required config options,
-basic usage, etc.
+## Using Proctor from Other Python Frameworks
+
+TODO
