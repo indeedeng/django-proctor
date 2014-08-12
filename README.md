@@ -192,5 +192,154 @@ If `PROCTOR_LAZY` is missing or `False`, lazy loading will not be used.
 
 ## Usage
 
+The Proctor middleware adds a `proc` object to `request`, which allows you to easily use Proctor group assignments from any view.
+
+Group assignments can be accessed using the dot operator on `proc`. Every test listed in `PROCTOR_TESTS` is guaranteed to exist as an attribute on `proc`.
+
+```py
+print request.proc.buttoncolortst
+# -> GroupAssignment(group=u'blue', value=1, payload=u'#2B60DE')
+
+print request.proc.testnotinsettings
+# throws AttributeError
+```
+
+Each group assignment has three attributes:
+
+* **group**: the assigned test group name (str)
+* **value**: the assigned bucket value (int)
+    * -1 typically means inactive, and 0 typically means control.
+* **payload**: the assigned test group payload value
+    * Used to change test-specific values from Proctor instead of in code.
+    * Is `None` if the test has no payload.
+    * The payload type can be a str, long, double, or a list of one of those.
+
+If Proctor did not give an assignment for a test, then that test is unassigned. In that case: group, value, and payload are all `None`.
+
+```py
+print request.proc.buttoncolortst
+# -> GroupAssignment(group=None, value=None, payload=None)
+```
+
+This can happen if an eligibility rule was not met, if there was no matching identifier for the test type, if the test was in `PROCTOR_TESTS` but not in the test matrix, or if django-proctor could not connect to Pipet (or got back an HTTP error) and set all assignments to unassigned by default.
+
+### Switching
+
+You can use Proctor group assignments to implement different behavior on your site based on the user's assigned test group.
+
+Suppose we have a test called "algorithmtst" in our test matrix with four test groups: `'inactive'`, `'control'`, `'bogo'`, and `'quick'`:
+
+```py
+if request.proc.algorithmtst.group == 'bogo':
+    bogosort()
+elif request.proc.algorithmtst.group == 'quick':
+    quicksort()
+else:
+    # 'control', 'inactive', and None (all default to our old sorting algorithm)
+    # Because this covers None (unassigned), this will also be used in case of error.
+    oldsort()
+```
+
+Usually your `'control'`, `'inactive'`, and `None` groups will have the same behavior, which is doing whatever your site did before you added this test or feature. It's convenient to have the else branch cover all of these groups.
+
+Ensure that your branches always cover the case that group is `None`. This ensures that if your Proctor Pipet instance goes down or starts returning an HTTP error due to some misconfiguration, your site will simply fall back to default behavior.
+
+### Templates
+
+Proctor can be used from Django templates as well if you properly set up `TEMPLATE_CONTEXT_PROCESSORS`.
+
+Your templates have the `proc` object in their context, allowing you to switch behavior based on Proctor groups:
+
+```htmldjango
+{% if proc.buttoncolortst.group == 'blue' %}
+<button class="blue-btn"></button>
+{% if proc.buttoncolortst.group == 'green' %}
+<button class="green-btn"></button>
+{% else %}
+<button class="grey-btn"></button>
+{% endif %}
+```
+
+```htmldjango
+{% if proc.newfeaturerollout.group == 'active' %}
+<button>Try our new feature!</button>
+{% endif %}
+```
+
+### Payloads
+
+Payloads allow you to specify test-specific values in the test matrix instead of in your code. This allows you to try many different variations without touching Django or even redeploying your application.
+
+Here is an example for button text on a call to action:
+
+```htmldjango
+<button>{{ proc.buttontexttst.payload|default_if_none:"Sign Up" }}</button>
+```
+
+Remember that payload can be `None` in many cases, including if Proctor Pipet goes down. Include a [default_if_none](https://docs.djangoproject.com/en/dev/ref/templates/builtins/#default-if-none) filter to ensure rational default behavior if this happens.
+
+Payloads can also be used from your views:
+
+```py
+algorithm_constants = request.proc.algoconsttst.payload
+if algorithm_constants is None:
+    algorithm_constants = [2, 3, 42]
+
+search_ranking(algorithm_constants)
+```
+
+#### Payload Arrays
+
+`payload` is `None` when a test group is unassigned, so any attribute accesses are still an error.
+
+In Python code, make sure you check for `None` before accessing attributes on the payload.
+
+In Django template output tags, invalid attribute accesses are interpreted as the `TEMPLATE_STRING_IF_INVALID` setting, which is the blank string by default. You can use the [default](https://docs.djangoproject.com/en/dev/ref/templates/builtins/#default) template tag to cover these instances, but be aware that this will also match on empty arrays and other falsey values:
+
+```htmldjango
+<h1>{{ proc.headertexttst.payload.0|default:"Default Title" }}</h1>
+<p>{{ proc.headertexttst.payload.1|default:"Default description text." }}</p>
+```
+
+See [How invalid variables are handled](https://docs.djangoproject.com/en/dev/ref/templates/api/#invalid-template-variables) in the Django template documentation for more details.
+
+### Logging
+
+To compare metrics between two different test groups, you can log each request's assigned test groups in addition to any metrics you want to track.
+
+django-proctor provides a simple comma-separated representation of all the Proctor test groups that the user is in for logging purposes:
+
+```py
+print str(request.proc)
+# -> "buttoncolortst1,countryalgotst0,newfeaturerollout0"
+```
+
+This output only includes non-negative test groups, as -1 typically means inactive groups that should not be logged.
+
+The `proc` object also has a method to obtain the list of test groups before joining with a comma:
+
+```py
+print request.proc.get_group_string_list()
+# -> ['buttoncolortst1', 'countryalgotst0', 'newfeaturerollout0']
+```
+
+### prforceGroups
+
+To test the implementation of your test group behavior, privileged users can attach a `prforceGroups` query parameter to their site's URL to force themselves into certain test groups:
+
+```
+http://django.example.com/?prforceGroups=buttoncolortst2,countryalgotst0
+```
+
+The format is simply the test name followed by the bucket value, with all test groups separated by commas.
+
+The value of `prforceGroups` is set as a session cookie. Your browser will be forced into those groups until your browser is closed. You can also set an empty prforceGroups to clear the cookie:
+
+```
+http://django.example.com/?prforceGroups=
+```
+
+The tests and bucket values specified in `prforceGroups` must exist in the Proctor test matrix.
+
 TODO: intro, can be used in other frameworks, required config options,
 basic usage, etc.
