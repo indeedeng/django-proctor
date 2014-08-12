@@ -94,7 +94,7 @@ class ProctorGroups(object):
 
         Negative bucket values are ignored as those are considered inactive.
 
-        >>> request.proc.get_group_string()
+        >>> str(request.proc)
         "buttoncolortst1,countryalgotst0,newfeaturerollout0"
 
         """
