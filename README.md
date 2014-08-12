@@ -111,17 +111,84 @@ def is_privileged(self, request):
 
 ```
 
-### Context Processor
+### settings.py
 
-### PROCTOR_TESTS
+You must set several things in your `settings.py` for django-proctor to work properly:
 
-### PROCTOR_API_ROOT
+#### MIDDLEWARE_CLASSES
 
-### PROCTOR_CACHE_METHOD
+Add the middleware you created to `MIDDLEWARE_CLASSES`. Make sure you place it after any middleware it depends on like `AuthenticationMiddleware`.
 
-### PROCTOR_CACHE_NAME
+#### TEMPLATE_CONTEXT_PROCESSORS
 
-### PROCTOR_LAZY
+Add `proctor.context_processors.proc` to `TEMPLATE_CONTEXT_PROCESSORS`. This makes the `proc` object available in all of your Django templates.
+
+#### PROCTOR_API_ROOT
+
+Set `PROCTOR_API_ROOT` to the URL at which Proctor Pipet is running.
+
+Include `http://` or `https://`. Do not include a trailing slash.
+
+If you want production to use a different test matrix than your staging server and your developer machines, then you may want to use a different Pipet instance depending on environment.
+
+```py
+PROCTOR_API_ROOT = "http://pipet.example.com"
+```
+
+#### PROCTOR_TESTS
+
+`PROCTOR_TESTS` is a tuple or list of the Proctor tests that your Django project intends to use.
+
+Add tests to this tuple before implementing them in your templates and code, and remove tests from this tuple after removing their implementations.
+
+All tests listed here are guaranteed to exist on the `proc` object.
+
+The tests listed here will also be in `str(proc)` (for logging test groups) if they have non-negative group values.
+
+```py
+PROCTOR_TESTS = (
+    'buttoncolortst',
+    'newfeaturerollout',
+)
+```
+
+#### PROCTOR_CACHE_METHOD
+
+You can optionally have django-proctor cache group assignments from the Proctor Pipet REST API. Ordinarily, every HTTP request that hits Django will trigger the Proctor middleware to make an HTTP request to Pipet. You can use caching to avoid this extra cost since group assignments typically stay the same.
+
+If the cache has no useful value (like when a new user visits your site), then django-proctor falls back to making an HTTP request to Proctor Pipet.
+
+If `PROCTOR_CACHE_METHOD` is missing or None, django-proctor will not do any caching.
+
+If `PROCTOR_CACHE_METHOD` is `'cache'`, django-proctor uses [Django's cache framework](https://docs.djangoproject.com/en/dev/topics/cache/) for caching group assignments. See `PROCTOR_CACHE_NAME`.
+
+If `PROCTOR_CACHE_METHOD` is `'session'`, django-proctor caches group assignments in the `request.session` dict. This is a decent option if all of your HTTP requests get or set [Django's session object](https://docs.djangoproject.com/en/dev/topics/http/sessions/) anyway.
+
+##### Cache Invalidation
+
+django-proctor's cache invalidation is fairly smart and will not use the cache if some property of the user's request has changed, like the identifiers, context variables, or the `prforceGroups` parameter. The cache will also be ignored if you change a setting like `PROCTOR_API_ROOT` or `PROCTOR_TESTS`.
+
+This means that if a user logs in, or a user changes their useragent, or you add a new test to `PROCTOR_TESTS`, the cached value will be skipped. You don't have to worry about outdated values.
+
+**TODO: Explain matrix version detection and caching after that invalid cache issue is resolved. Current cache implementation does not work properly with multiple processes.**
+
+#### PROCTOR_CACHE_NAME
+
+This setting is only meaningful if `PROCTOR_CACHE_METHOD` is `'cache'`.
+
+`PROCTOR_CACHE_NAME` is the name of a cache in `CACHES` that django-proctor will use.
+
+If `PROCTOR_CACHE_NAME` is missing or None, django-proctor uses the `default` cache.
+
+#### PROCTOR_LAZY
+
+If `PROCTOR_LAZY` is `True`, then the `proc` object lazily loads its groups. Proctor group assignments are only retrieved from either the cache or the Proctor Pipet REST API on first access of the `proc` object.
+
+This means that HTTP requests to your Django server that never use the `proc` object don't incur the cost of getting group assignments.
+
+When measuring performance, remember that this option may move the timing of a cache access and REST API request to an unexpected place (like during template rendering).
+
+If `PROCTOR_LAZY` is missing or `False`, lazy loading will not be used.
 
 ## Usage
 
