@@ -253,7 +253,7 @@ Your templates have the `proc` object in their context, allowing you to switch b
 ```htmldjango
 {% if proc.buttoncolortst.group == 'blue' %}
 <button class="blue-btn"></button>
-{% if proc.buttoncolortst.group == 'green' %}
+{% elif proc.buttoncolortst.group == 'green' %}
 <button class="green-btn"></button>
 {% else %}
 <button class="grey-btn"></button>
