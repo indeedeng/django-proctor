@@ -54,7 +54,7 @@ class MyProctorMiddleware(proctor.middleware.BaseProctorMiddleware):
 
 Identifiers are strings that identify users of your site uniquely. These can include tracking cookies and account ids. Proctor uses this information to keep users in the same test groups across requests.
 
-This returns a dict of identifier source keys (see Pipet service configuration) to their values.
+This returns a dict of identifier source keys (see Pipet configuration) to their values.
 
 If a user lacks a certain identifier, don't include it in the dict. Proctor will skip any tests using that identifier. However, make sure you always return at least one identifier like a tracking cookie.
 
@@ -76,11 +76,11 @@ def get_identifiers(self, request):
 
 Context variables are properties about the user that are used in Proctor test rules to selectively enable tests or change the allocations of a test depending on whether an expression is true. This can be used to run a test only on Firefox, or you can run a test at 50% for US users and 10% for everyone else.
 
-This returns a dict of context variable source keys (see Pipet service configuration) to their values, which are converted by Pipet to their final types before rule expressions are evaluated.
+This returns a dict of context variable source keys (see Pipet configuration) to their values, which are converted by Pipet to their final types before rule expressions are evaluated.
 
 If you don't override this method, django-proctor uses no context variables.
 
-If the Pipet service configuration doesn't have a default value for a context variable, it must be included on every API request. If that is the case, make sure that context variable appears in this return value.
+If the Pipet configuration doesn't have a default value for a context variable, it must be included on every API request. If that is the case, make sure that context variable appears in this return value.
 
 This method is always run after any previous middleware.
 
