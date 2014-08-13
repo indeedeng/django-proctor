@@ -303,6 +303,60 @@ In Django template output tags, invalid attribute accesses are interpreted as th
 
 See [How invalid variables are handled](https://docs.djangoproject.com/en/dev/ref/templates/api/#invalid-template-variables) in the Django template documentation for more details.
 
+### JavaScript
+
+If you want to use Proctor test group assignments from browser-side JavaScript, you'll have to provide the values you want to use to your JavaScript through Django's templating language.
+
+A simple way to do this is to define global JavaScript variables in a script tag in your HTML template with the values your code will use:
+
+```htmldjango
+<script type="text/javascript">
+    {% if proc.buttoncolortst.group is not None %}
+    var buttoncolortstgroup = "{{ proc.buttoncolortst.group|escapejs }}";
+    {% else %}
+    var buttoncolortstgroup = null;
+    {% endif %}
+
+    {% if proc.newfeaturerollout.group == 'active' %}
+    var usenewfeature = true;
+    {% else %}
+    var usenewfeature = false;
+    {% endif %}
+
+    var buttontext = "{{ proc.buttontexttst.payload|default_if_none:"Sign Up"|escapejs }}";
+</script>
+```
+
+For strings, wrap the template output tag in quotes. Use the [escapejs](https://docs.djangoproject.com/en/dev/ref/templates/builtins/#escapejs) filter so that special characters like quotes and angle brackets are correctly placed into your JavaScript.
+
+Some people place script tags like this in a template block like "js" so that these special values appear in a consistent place alongside other script includes.
+
+You can use these global variables in your JavaScript static files to implement your tests:
+
+```js
+$(function() {
+    if (buttoncolortstgroup === "blue") {
+        $(".buttonone").css("background", "#00f");
+    } else if (buttoncolortstgroup === "green") {
+        $(".buttonone").css("background", "#0f0");
+    } else {
+        $(".buttonone").css("background", "#888");
+    }
+
+    if (usenewfeature) {
+        $(".buttontwo").show();
+    }
+
+    $(".buttonthree").text(buttontext);
+});
+```
+
+This is just one way of accessing Proctor test groups from the browser. Use whatever makes the most sense for your project.
+
+Another way is templating your JavaScript directly by placing your code in HTML and mixing your Django template tags with JavaScript code. You could even template your .js files instead of serving them statically. However, these two alternatives can be messy and are not best practices.
+
+If your application is complex enough, you could even consider making a Django view that returns some test groups or payloads and have your JavaScript make an AJAX request to get them.
+
 ### Logging
 
 To compare metrics between two different test groups, you can log each request's assigned test groups in addition to any metrics you want to track.
