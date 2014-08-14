@@ -22,6 +22,17 @@ class BaseProctorMiddleware(object):
     def __init__(self):
         self.cacher = self.get_cacher()
 
+        if isinstance(settings.PROCTOR_TESTS, basestring):
+            # User accidentally defined a string instead of tuple in settings.
+            # PROCTOR_TESTS = (
+            #     'buttoncolortst'
+            # )
+            raise ImproperlyConfigured(
+                "PROCTOR_TESTS should be a tuple or list, not a string. "
+                "When defining a tuple, make sure you include a comma: "
+                "PROCTOR_TESTS = ('mytest',)"
+            )
+
     def process_request(self, request):
         """
         Call the Proctor API and obtain all test group assignments.

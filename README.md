@@ -152,6 +152,12 @@ PROCTOR_TESTS = (
 )
 ```
 
+If you're only using one test, make sure you include a comma in the tuple. Otherwise, Python interprets it as just a string.
+
+```py
+PROCTOR_TESTS = ('buttoncolortst',)
+```
+
 #### PROCTOR_CACHE_METHOD
 
 You can optionally have django-proctor cache group assignments from the Proctor Pipet REST API. Ordinarily, every HTTP request that hits Django will trigger the Proctor middleware to make an HTTP request to Pipet. You can use caching to avoid this extra cost since group assignments typically stay the same.
