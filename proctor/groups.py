@@ -139,17 +139,6 @@ def extract_groups(api_response, defined_tests):
             bucket_fields = api_groups[test_name]
             # payload is hidden behind one of 'stringValue', 'longArray', etc.
             # Sometimes there is no payload.
-
-            # TEMPORARY WORKAROUND for nulls in JSON. Revert later.
-            # Sometimes the Proctor API outputs null for payloads even though
-            # payload should be absent, which would cause an exception.
-            if 'payload' in bucket_fields and bucket_fields['payload'] is None:
-                del bucket_fields['payload']
-            elif 'payload' in bucket_fields:
-                bucket_fields['payload'] = {
-                    k:v for k,v in bucket_fields['payload'].iteritems()
-                    if v is not None}
-
             payload = (bucket_fields['payload'].popitem()[1]
                 if 'payload' in bucket_fields else None)
             assignment = GroupAssignment(group=bucket_fields['name'],
