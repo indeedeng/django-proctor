@@ -4,7 +4,7 @@ django-proctor allows you to use [Proctor](https://github.com/indeedeng/proctor)
 
 Proctor allows you to place your users into randomly-assigned test groups for A/B testing. It can also be used for feature toggles and gradual rollouts of new features.
 
-Using Proctor group assignments from Django templates is extremely easy:
+Using Proctor group assignments from Django templates is extremely easy by checking the bucket's name:
 
 ```htmldjango
 {% if proc.buttoncolortst.group == 'blue' %}
@@ -391,7 +391,7 @@ To test the implementation of your test group behavior, privileged users can att
 http://django.example.com/?prforceGroups=buttoncolortst2,countryalgotst0
 ```
 
-The format is simply the test name followed by the bucket value, with all test groups separated by commas.
+The format is simply the test name followed by the bucket value (not the name), with all test groups separated by commas.
 
 The value of `prforceGroups` is set as a session cookie. Your browser will be forced into those groups until your browser is closed. You can also set an empty prforceGroups to clear the cookie:
 
