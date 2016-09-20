@@ -1,6 +1,5 @@
 # django-proctor
 
-**MASTER IS AUTO-SYNCED TO PUBLIC GITHUB. OPENSOURCE.**
 
 django-proctor allows you to use [Proctor](https://github.com/indeedeng/proctor) (an A/B testing framework) from Django by using [Proctor Pipet](https://github.com/indeedeng/proctor-pipet), which exposes Proctor as a simple REST API.
 
