@@ -47,7 +47,7 @@ class ProctorParameters(object):
         return not (self == other)
 
 
-def call_proctor(params, timeout=1.0):
+def call_proctor(params, timeout=1.0, http=None):
     """
     Make an HTTP request to the Proctor REST API /groups/identify endpoint.
 
@@ -58,11 +58,13 @@ def call_proctor(params, timeout=1.0):
         If None, requests will attempt the request forever.
         For network unreachable errors, requests inexplicably takes ~20x this
         value before returning.
+    http: Instance of requests.Session (or equivalent).
 
     A timeout is important to ensure your web backend does not block on
     Proctor API calls forever if the API's performance severely degrades or
     starts hanging on all HTTP requests for some reason.
     """
+    http = http or requests
 
     api_url = "{root}/groups/identify".format(root=params.api_root)
 
@@ -82,7 +84,7 @@ def call_proctor(params, timeout=1.0):
 
     try:
         logger.debug("Calling Proctor API: %s with %s", api_url, http_params)
-        response = requests.get(api_url, params=http_params, timeout=timeout)
+        response = http.get(api_url, params=http_params, timeout=timeout)
 
     # Handle all possible errors.
     # This may be running in production, and Proctor is not critical,

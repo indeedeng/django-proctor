@@ -10,11 +10,12 @@ class LazyProctorGroups(groups.ProctorGroups):
     GroupAssignment is accessed or when the group string list is requested.
     """
 
-    def __init__(self, params, cacher=None, request=None):
+    def __init__(self, params, cacher=None, request=None, http=None):
         self.loaded = False
         self._params = params
         self._cacher = cacher
         self._request = request
+        self._http = http
         group_dict = {test: LazyGroupAssignment(self, test)
             for test in params.defined_tests}
         super(LazyProctorGroups, self).__init__(group_dict)
@@ -33,7 +34,7 @@ class LazyProctorGroups(groups.ProctorGroups):
             return
 
         self._group_dict = identify.load_group_dict(
-            self._params, self._cacher, self._request)
+            self._params, self._cacher, self._request, self._http)
 
         # Replace lazy attributes with loaded group assignments.
         for test_name, assignment in self._group_dict.iteritems():

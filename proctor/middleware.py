@@ -48,7 +48,7 @@ class BaseProctorMiddleware(object):
         )
 
         request.proc = identify.identify_groups(
-            params, cacher=self.cacher, request=request, lazy=self.is_lazy())
+            params, cacher=self.cacher, request=request, lazy=self.is_lazy(), http=self.get_http())
 
         return None
 
@@ -119,6 +119,17 @@ class BaseProctorMiddleware(object):
 
     def is_lazy(self):
         return getattr(settings, 'PROCTOR_LAZY', False)
+
+    def get_http(self):
+        """
+        Return an instance of requests.Session (or equivalent) that will be
+        used to make HTTP requests to the proctor API.
+
+        Return None to not use a session (e.g. requests.get).
+
+        This method is called every time process_request is called.
+        """
+        return None
 
     def _get_force_groups(self, request):
         """

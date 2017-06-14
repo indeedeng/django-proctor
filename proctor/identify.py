@@ -3,7 +3,7 @@ import groups
 import lazy as lazy_groups
 
 
-def identify_groups(params, cacher=None, request=None, lazy=False):
+def identify_groups(params, cacher=None, request=None, lazy=False, http=None):
     """
     Identify the groups associated with the params and return ProctorGroups.
 
@@ -13,6 +13,8 @@ def identify_groups(params, cacher=None, request=None, lazy=False):
         Reduces the number of HTTP requests to the Proctor API. (default: None)
     request: The Django request. Only used if cacher is a cache.SessionCacher.
         (default: None)
+    http: An instance of requests.Session (or equivalent), used for making 
+        http requests (default: None)
     lazy: A bool indicating whether group assignment should be lazy. If True,
         cache lookup and HTTP requests to the Proctor API are delayed until
         the group assignments are accessed for the first time. (default: False)
@@ -26,18 +28,18 @@ def identify_groups(params, cacher=None, request=None, lazy=False):
     See groups.py or the README for more details.
     """
     if lazy:
-        return lazy_groups.LazyProctorGroups(params, cacher, request)
+        return lazy_groups.LazyProctorGroups(params, cacher, request, http)
     else:
-        return groups.ProctorGroups(load_group_dict(params, cacher, request))
+        return groups.ProctorGroups(load_group_dict(params, cacher, request, http))
 
 
-def load_group_dict(params, cacher=None, request=None):
+def load_group_dict(params, cacher=None, request=None, http=None):
     group_dict = None
     if cacher is not None:
         group_dict = cacher.get(request, params)
     if group_dict is None:
         # Cache miss or caching disabled.
-        api_response = api.call_proctor(params)
+        api_response = api.call_proctor(params, http=http)
         group_dict = groups.extract_groups(api_response, params.defined_tests)
         # Must cache the api response, but not if api had an error.
         if cacher is not None and api_response is not None:

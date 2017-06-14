@@ -112,6 +112,12 @@ def is_privileged(self, request):
 
 ```
 
+#### get_http()
+
+Returns an instance of `requests.Session` (or equivalent) that will be used when making HTTP requests to the API.
+
+If you don't override this method, it returns None, which will cause the api to use the `requests` module.
+
 ### settings.py
 
 You must set several things in your `settings.py` for django-proctor to work properly:
