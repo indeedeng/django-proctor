@@ -430,6 +430,8 @@ api, cache*, groups, identify, lazy
 
 cache unfortunately has some Django mixed in for some of its subclasses. It imports django.core.cache, it uses Django in subclasses, and the abstract Cacher interface takes `request` as a parameter (because `SessionCacher` needs it, but it can safely be None for all other subclasses).
 
+Also, identify.py imports from django settings for similar reasons when looking up account details.
+
 If this is a significant problem for you, ask us to split this into two packages: one for Python, and one for Django that has the former as a dependency. Or contribute a solution that splits the packages up.
 
 When implementing Proctor in other frameworks, use `middleware.py` to see how we implemented this for Django. We handle providing context variables and identifiers through subclassing. Other implementations could register functions (through decorators or otherwise) to provide these details. Also, note how the prforceGroups query parameter and cookie is handled.
