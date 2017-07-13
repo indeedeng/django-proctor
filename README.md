@@ -28,7 +28,8 @@ If you need to use Proctor groups in a cron job or some service without a reques
 ```py
 from proctor.identify import proc_by_accountid
 
-if proc_by_accountid(recruiter.user.username).newfeaturerollout.group == "active":
+accountid = 999999
+if proc_by_accountid(accountid).newfeaturerollout.group == "active":
     foo()
 else:
     bar()
