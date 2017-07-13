@@ -24,6 +24,18 @@ else:
     bar()
 ```
 
+If you need to use Proctor groups in a cron job or some service without a request, you can do an Account test:
+```py
+from proctor.identify import proc_by_accountid
+
+accountid = 999999
+if proc_by_accountid(accountid).newfeaturerollout.group == "active":
+    foo()
+else:
+    bar()
+
+```
+
 ## Configuration
 
 Before using django-proctor, you need to set up [Proctor Pipet](https://github.com/indeedeng/proctor-pipet). This is the REST API that django-proctor communicates with to obtain test group assignments.
@@ -417,6 +429,8 @@ However, these modules would be usable in other Python frameworks with some mino
 api, cache*, groups, identify, lazy
 
 cache unfortunately has some Django mixed in for some of its subclasses. It imports django.core.cache, it uses Django in subclasses, and the abstract Cacher interface takes `request` as a parameter (because `SessionCacher` needs it, but it can safely be None for all other subclasses).
+
+Also, identify.py imports from django settings for similar reasons when looking up account details.
 
 If this is a significant problem for you, ask us to split this into two packages: one for Python, and one for Django that has the former as a dependency. Or contribute a solution that splits the packages up.
 
