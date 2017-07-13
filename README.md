@@ -24,6 +24,17 @@ else:
     bar()
 ```
 
+If you need to use Proctor groups in a cron job or some service without a request, you can do an Account test:
+```py
+from proctor.identify import proc_by_accountid
+
+if proc_by_accountid(recruiter.user.username).newfeaturerollout.group == "active":
+    foo()
+else:
+    bar()
+
+```
+
 ## Configuration
 
 Before using django-proctor, you need to set up [Proctor Pipet](https://github.com/indeedeng/proctor-pipet). This is the REST API that django-proctor communicates with to obtain test group assignments.

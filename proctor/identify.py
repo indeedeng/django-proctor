@@ -1,6 +1,7 @@
 import api
 import groups
 import lazy as lazy_groups
+from django.conf import settings
 
 
 def identify_groups(params, cacher=None, request=None, lazy=False, http=None):
@@ -46,3 +47,23 @@ def load_group_dict(params, cacher=None, request=None, http=None):
             cacher.set(request, params, group_dict, api_response)
 
     return group_dict
+
+
+def proc_by_accountid(accountid):
+    """ Gets proctor groups by accountid
+    
+    Args:
+        accountid: typically the same id found in request.user.username
+    
+    Returns:
+        GroupAssignment
+    """
+    identifier = {'account':accountid}
+    params = api.ProctorParameters(
+            api_root=settings.PROCTOR_API_ROOT,
+                defined_tests=settings.PROCTOR_TESTS,
+                context_dict={'ua':''},
+                identifier_dict=identifier,
+                force_groups=None,
+            )
+    return identify_groups(params)
