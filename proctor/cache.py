@@ -209,7 +209,7 @@ class CacheCacher(Cacher):
     def __init__(self, cache_name=None, version_timeout_seconds=None):
         super(CacheCacher, self).__init__(version_timeout_seconds)
         cache_name = cache_name or 'default'
-        self.cache = django.core.cache.get_cache(cache_name)
+        self.cache = django.core.cache.caches[cache_name]
 
     def _get_cache_dict(self, request, params):
         return self.cache.get(self._get_cache_key(params))
