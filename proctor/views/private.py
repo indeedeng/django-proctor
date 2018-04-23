@@ -4,8 +4,7 @@ from django.views import generic
 from django.template import RequestContext
 from django.shortcuts import render
 
-from proctor import api, constants, settings as local_settings
-import matrix
+from .. import api, constants, matrix, settings as local_settings
 import json
 import requests
 

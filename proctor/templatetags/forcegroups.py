@@ -2,7 +2,7 @@ import re
 
 from django import template
 
-from views import private
+from .. import views
 
 register = template.Library()
 
@@ -30,7 +30,7 @@ def get_clean_groups(context, test_name):
     # Look for the prforceGroups cookie and join the existing
     # and the new forced groups together
     request = context['request']
-    groups = private.ForceGroupsView.get_prforcegroups(request)
+    groups = views.private.ForceGroupsView.get_prforcegroups(request)
 
     # split into a list a remove any entries matching the current test
     group_list = [group for group in groups.split(',') if group]
