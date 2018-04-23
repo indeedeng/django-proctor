@@ -40,7 +40,7 @@ def load_group_dict(params, cacher=None, request=None, http=None):
         group_dict = cacher.get(request, params)
     if group_dict is None:
         # Cache miss or caching disabled.
-        api_response = api.call_proctor(params, http=http)
+        api_response = api.call_proctor_identify(params, http=http)
         group_dict = groups.extract_groups(api_response, params.defined_tests)
         # Must cache the api response, but not if api had an error.
         if cacher is not None and api_response is not None:
@@ -60,7 +60,7 @@ def proc_by_accountid(accountid):
     """
     identifier = {'account':accountid}
     params = api.ProctorParameters(
-            api_root=settings.PROCTOR_API_ROOT,
+                api_root=settings.PROCTOR_API_ROOT,
                 defined_tests=settings.PROCTOR_TESTS,
                 context_dict={'ua':''},
                 identifier_dict=identifier,

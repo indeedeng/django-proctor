@@ -52,6 +52,48 @@ $ pip install django-proctor
 
 Or add it to your `requirements.txt` file (preferably with the current version).
 
+### Views
+
+There are a set of private views that are available for testing and debugging. Enabling these views requires some extra configuration.
+
+#### Installed Apps
+
+Add `proctor` to your project's list of installed apps.
+
+```py
+INSTALLED_APPS += (
+    ...
+    proctor,
+    ...
+)
+```
+#### Urls
+
+Import the proctor urls into a private space in your project.
+
+```py
+urlpatterns = patterns(
+    ...
+    url(r'^', include('proctor.urls')),
+    ...
+)
+```
+
+##### ShowTestMatrix
+
+The ShowTestMatrix view allows you to see the entire test matrix for your specific PROCTOR_TESTS. This view is simply the json version of the test matrix filtered to your tests.
+
+
+Using the above url pattern example, the test matrix would be available at `http://<your_project_root>/private/proctor/show` and `http://<your_project_root>/private/showTestMatrix`. The latter is for backwards compatibility with other projects.
+
+##### Force Groups
+
+The Force Groups view allows you to see what the current group assignments are for your session and identification and force yourself into a specific group for any test.
+
+**NOTE**: This template does come with a default base template, but it can be overidden. To override the default base template, you must have a base template to extend and the name of that template file should be set in PROCTOR_BASE_TEMPLATE.
+
+Using the above url pattern example, the force groups page would be available at `http://<your_project_root>/private/proctor/force`.
+
 ### Middleware
 
 django-proctor does most of its processing in a middleware. This runs before your views and adds `proc` to the `request` object, which lets you access test group assignments.
@@ -175,6 +217,14 @@ If you're only using one test, make sure you include a comma in the tuple. Other
 
 ```py
 PROCTOR_TESTS = ('buttoncolortst',)
+```
+
+#### PROCTOR_BASE_TEMPLATE
+
+Set `PROCTOR_BASE_TEMPLATE` to the name of the base html template being used in your project.
+
+```py
+PROCTOR_BASE_TEMPLATE = "base.html"
 ```
 
 #### PROCTOR_CACHE_METHOD

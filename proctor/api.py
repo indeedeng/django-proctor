@@ -3,6 +3,8 @@ import socket
 
 import requests
 
+import constants
+
 logger = logging.getLogger('application.proctor.api')
 
 
@@ -47,7 +49,15 @@ class ProctorParameters(object):
         return not (self == other)
 
 
-def call_proctor(params, timeout=1.0, http=None):
+def call_proctor_identify(params, timeout=1.0, http=None):
+    return call_proctor(params, constants.API_METHOD_GROUPS_IDENTIFY, timeout, http)
+
+
+def call_proctor_matrix(params, timeout=1.0, http=None):
+    return call_proctor(params, constants.API_METHOD_PROCTOR_MATRIX, timeout, http)
+
+
+def call_proctor(params, api_method=constants.API_METHOD_GROUPS_IDENTIFY, timeout=1.0, http=None):
     """
     Make an HTTP request to the Proctor REST API /groups/identify endpoint.
 
@@ -66,7 +76,7 @@ def call_proctor(params, timeout=1.0, http=None):
     """
     http = http or requests
 
-    api_url = "{root}/groups/identify".format(root=params.api_root)
+    api_url = "{root}/{method}".format(root=params.api_root, method=api_method)
 
     http_params = {}
     # Context variables and identifiers need prefixes.
@@ -80,7 +90,7 @@ def call_proctor(params, timeout=1.0, http=None):
     http_params['test'] = ','.join(params.defined_tests)
 
     if params.force_groups:
-        http_params['prforceGroups'] = params.force_groups
+        http_params[constants.PROP_NAME_FORCE_GROUPS] = params.force_groups
 
     try:
         logger.debug("Calling Proctor API: %s with %s", api_url, http_params)
@@ -132,11 +142,18 @@ def call_proctor(params, timeout=1.0, http=None):
             api_url, response.text)
         return None
 
-    # The Proctor REST API should never return 200 without groups.
-    if 'data' not in api_response or 'groups' not in api_response['data']:
+    # The Proctor REST API should never return 200 without groups or tests.
+    error = None
+    if api_method == constants.API_METHOD_GROUPS_IDENTIFY \
+            and ('data' not in api_response or 'groups' not in api_response['data']):
+        error = 'missing groups field'
+    elif api_method == constants.API_METHOD_PROCTOR_MATRIX and ('tests' not in api_response):
+        error = 'missing tests field'
+
+    if error:
         logger.error(
-            "Proctor API at %s returned JSON with missing groups field: %s",
-            api_url, api_response)
+            "Proctor API at %s returned JSON with %s: %s",
+            api_url, error, api_response)
         return None
 
     # No error conditions detected.
