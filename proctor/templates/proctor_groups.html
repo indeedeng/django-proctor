@@ -1,0 +1,196 @@
+{% extends basetemplate %}
+{% load forcegroups %}
+
+{% block extracss %}
+<style>
+    .pgbody {
+        width: 80%;
+    }
+    .test-container {
+        width: 90%;
+    }
+    .grpname {
+        font-size: 17px;
+        text-transform: capitalize;
+        width: 85%;
+        margin: 0px;
+    }
+
+    .grpdesc {
+        margin-left: 18px;
+    }
+
+    .submitgrp {
+        color: white !important;
+    }
+    .submit-wrapper {
+        padding: 14px;
+    }
+
+    .pgtitle {
+        text-align: center;
+        font-weight: 300;
+        padding-top: 14px;
+    }
+
+    hr {
+        border-top: 1px solid #AAA;
+    }
+
+
+    .nav-back {
+        font-size: 21px;
+    }
+
+    .navbar-back {
+        padding-top: 13px;
+    }
+
+    .error {
+        font-size: 12px;
+        font-weight: bold;
+        color: #b30001;
+        margin-bottom: 11.5px;
+    }
+
+    .warning {
+        font-size: 12px;
+        font-weight: bold;
+        color: #ff7405;
+        margin-bottom: 11.5px;
+    }
+
+    .reset input {
+        background-color: #f60;
+    }
+
+    .ui-allocation-bar-container {
+        min-width: 200px;
+        margin-bottom: 10px;
+    }
+    .ui-allocation-bar {
+        display: block;
+        border: 1px solid #BBB;
+        overflow: hidden;
+        padding: 5px;
+        background-color: #FFF;
+    }
+    .ui-allocation-range {
+        display: inline-block;
+        float: left;
+        text-align: center;
+        white-space: nowrap;
+        padding: 5px 0;
+        overflow: hidden;
+    }
+    .ui-allocation-range-lbl {
+        text-align: center;
+    }
+    .pas {
+        padding: 5px;
+    }
+    .bd {
+        overflow: hidden;
+        zoom: 1;
+    }
+    .ui-color0 { background-color: #8DD3C7;}
+    .ui-color1 { background-color: #FFFFB3;}
+    .ui-color2 { background-color: #BEBADA;}
+    .ui-color3 { background-color: #FB8072;}
+    .ui-color4 { background-color: #80B1D3;}
+    .ui-color5 { background-color: #FDB462;}
+    .ui-color6 { background-color: #B3DE69;}
+    .ui-color7 { background-color: #FCCDE5;}
+    .ui-color8 { background-color: #D9D9D9;}
+    .ui-color9 { background-color: #BC80BD;}
+    .ui-color10 { background-color: #CCEBC5;}
+    .ui-color11 { background-color: #FFED6F;}
+
+</style>
+{% endblock %}
+
+{% block body %}
+
+    <div class="container-fluid pgbody">
+
+        <div class="row">
+
+            <a href="/">
+                <div class="col-xs-2 navbar-back">
+                    <span class="icon-left nav-back"></span>
+                </div>
+            </a>
+
+
+            <a href="{{ request.path }}">
+                <div class="col-xs-8">
+                    <h3 class="no margin pgtitle"> Proctor Groups </h3>
+                </div>
+            </a>
+        </div>
+
+
+            <hr>
+
+
+
+        {% for test, allocation in allocations.items %}
+            <div class="container-fluid test-container">
+                <form method="GET" action="{{ request.path }}">
+                <h4>{{ test }}</h4>
+                {% if allocation.ranges %}
+                    <div class="bd pas ui-allocation-bar-container">
+                        <small>Original Allocations</small>
+                        <div class="ui-allocation-bar">
+                            {% for range in allocation.ranges %}
+                                <span title="{{ range.name }} - {{ range.percentage }}%" class="ui-allocation-range ui-color{{ range.index }}" style="width: {{ range.percentage }}%;">
+                                    <span class="ui-allocation-range-lbl">{{ range.name }} - {{ range.percentage }}%</span>
+                                </span>
+                            {% endfor %}
+                        </div>
+                    </div>
+                {% endif %}
+                {% if allocation.forced %}
+                    <div class="warning">
+                        <p>This test has been forced into its group assignment.</p>
+                    </div>
+                {% endif %}
+                {% if allocation.assignment == None %}
+                <div class="error">
+                    Test not found in proctor response (you may not have the correct identifier set)
+                </div>
+                {% endif %}
+                <div class="assignment-container">
+                    {% for b in allocation.buckets %}
+                        <div class="assignment-bucket">
+                            <input type="radio" name="prforceGroups" value="{% addforcegroups test b.value %}" id="{{test}}{{ b.value }}"
+                                   {% if b.value == allocation.assignment %} checked {% endif %}
+                                    > <label class="grpname" for="{{ test }}{{ b.value }}">{{ b.name }}</label>
+                            <br>
+                            <small class="grpdesc">{{ b.description }}</small>
+                        </div>
+                    {% endfor %}
+                </div>
+
+                <div class="center submit-wrapper" >
+                    <input type="submit" class="pull-right button full width dark blue bg light shadow beneath submitgrp"
+                           value="Set Groups"/>
+                </div>
+                </form>
+                {% if allocation.forced %}
+                    <div class="center submit-wrapper reset" style="margin-top: 10px;">
+                        <form action="{{ request.path }}">
+                            <input type="hidden" name="prforceGroups" value="{% removeforcegroups test %}"/>
+                            <input type="submit"
+                                class="pull-right button full width light shadow beneath submitgrp" value="Reset Groups"/>
+                        </form>
+                    </div>
+                {% endif %}
+            </div>
+            <hr>
+        {% endfor %}
+
+
+    </div>
+
+{% endblock %}

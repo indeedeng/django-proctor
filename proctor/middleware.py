@@ -4,6 +4,7 @@ from django.core.exceptions import ImproperlyConfigured
 import api
 import cache
 import identify
+import constants
 
 
 class BaseProctorMiddleware(object):
@@ -55,11 +56,11 @@ class BaseProctorMiddleware(object):
     def process_response(self, request, response):
         """Add prforceGroups cookie if necessary."""
         # Only necessary if user has new prforceGroups for us.
-        if self.is_privileged(request) and 'prforceGroups' in request.GET:
+        if self.is_privileged(request) and constants.PROP_NAME_FORCE_GROUPS in request.GET:
             # Cookie lasts until end of browser session.
             # forcegroups is for dev testing, don't want it to last forever.
-            response.set_cookie('prforceGroups',
-                value=request.GET['prforceGroups'])
+            response.set_cookie(constants.PROP_NAME_FORCE_GROUPS,
+                value=request.GET[constants.PROP_NAME_FORCE_GROUPS])
         return response
 
     def get_context(self, request):
@@ -142,11 +143,11 @@ class BaseProctorMiddleware(object):
         """
         privileged = self.is_privileged(request)
 
-        if privileged and 'prforceGroups' in request.GET:
-            return request.GET['prforceGroups']
+        if privileged and constants.PROP_NAME_FORCE_GROUPS in request.GET:
+            return request.GET[constants.PROP_NAME_FORCE_GROUPS]
         # Even if the cookie is present, no guarantee that we set it.
         # So we must check privilege again.
-        elif privileged and 'prforceGroups' in request.COOKIES:
-            return request.COOKIES['prforceGroups']
+        elif privileged and constants.PROP_NAME_FORCE_GROUPS in request.COOKIES:
+            return request.COOKIES[constants.PROP_NAME_FORCE_GROUPS]
         else:
             return None
