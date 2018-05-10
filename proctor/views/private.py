@@ -79,10 +79,10 @@ class ForceGroupsView(generic.TemplateView):
                 "forced": assignment_fullname in prforcegroups
             }
 
-        context = RequestContext(request, {
+        context = {
             "allocations": allocations,
             "basetemplate": self._get_base_template()
-        })
+        }
         return render(request, self.template_name, context)
 
     def _get_test_ranges(self, ranges, buckets):
