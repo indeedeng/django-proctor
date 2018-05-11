@@ -72,11 +72,11 @@ INSTALLED_APPS += (
 Import the proctor urls into a private space in your project.
 
 ```py
-urlpatterns = patterns(
+urlpatterns = [
     ...
-    url(r'^', include('proctor.urls')),
+    url(r'^private/', include('proctor.urls'))
     ...
-)
+]
 ```
 
 ##### ShowTestMatrix
