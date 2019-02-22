@@ -57,8 +57,11 @@ default_if_none filter. This is typically the same text as inactive/control.
 
     <button>{{ proc.buttontexttst.payload|default_if_none:"Sign Up" }}</button>
 """
+from __future__ import absolute_import, unicode_literals
 
 import collections
+
+import six
 
 
 GroupAssignment = collections.namedtuple(
@@ -80,7 +83,7 @@ class ProctorGroups(object):
 
         # For convenience, we allow all defined tests to be accessed through
         # the dot operator on ProctorGroups.
-        for test_name, assignment in group_dict.iteritems():
+        for test_name, assignment in six.iteritems(group_dict):
             # Make sure this doesn't overwrite an already-defined method.
             if not hasattr(self, test_name):
                 setattr(self, test_name, assignment)
@@ -113,7 +116,7 @@ class ProctorGroups(object):
         non-Proctor-related groups before passing this list to your logger.
         """
         return [test_name + str(assignment.value)
-                for test_name, assignment in self._group_dict.iteritems()
+                for test_name, assignment in six.iteritems(self._group_dict)
                 if assignment is not _UNASSIGNED_GROUP and assignment.value >= 0]
 
 

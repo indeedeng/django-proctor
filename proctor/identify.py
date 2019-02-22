@@ -1,7 +1,10 @@
-import api
-import groups
-import lazy as lazy_groups
+from __future__ import absolute_import, unicode_literals
+
 from django.conf import settings
+
+from . import api
+from . import groups
+from . import lazy as lazy_groups
 
 
 def identify_groups(params, cacher=None, request=None, lazy=False, http=None):

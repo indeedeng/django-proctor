@@ -1,3 +1,6 @@
+from __future__ import absolute_import, unicode_literals
+
+
 def proc(request):
     """
     Place the ProctorGroups 'proc' object in every template context.

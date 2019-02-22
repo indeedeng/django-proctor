@@ -1,9 +1,12 @@
+from __future__ import absolute_import, unicode_literals
+
 import logging
 import socket
 
 import requests
+import six
 
-import constants
+from . import constants
 
 logger = logging.getLogger('application.proctor.api')
 
@@ -80,9 +83,9 @@ def call_proctor(params, api_method=constants.API_METHOD_GROUPS_IDENTIFY, timeou
     http_params = {}
     # Context variables and identifiers need prefixes.
     http_params.update(('ctx.' + key, value)
-                       for key, value in params.context_dict.iteritems())
+                       for key, value in six.iteritems(params.context_dict))
     http_params.update(('id.' + key, value)
-                       for key, value in params.identifier_dict.iteritems())
+                       for key, value in six.iteritems(params.identifier_dict))
 
     # test is a comma-separated list of test names.
     # Always provide test. If not provided, Pipet returns all matrix tests.

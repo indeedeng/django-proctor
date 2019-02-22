@@ -3,15 +3,17 @@ Provides simple implementations of Django-based caching methods.
 
 Used by ProctorMiddleware to easily take advantage of caching.
 """
+from __future__ import absolute_import, unicode_literals
 
 import logging
 import string
 import time
 
 import django.core.cache
+import six
 
-import api
-import groups
+from . import api
+from . import groups
 
 logger = logging.getLogger('application.proctor.cache')
 
@@ -64,7 +66,7 @@ class Cacher(object):
             # Need to convert it back before returning.
             logger.debug("Proctor cache HIT")
             return {key: groups.GroupAssignment(*val)
-                    for key, val in group_dict.iteritems()}
+                    for key, val in six.iteritems(group_dict)}
         else:
             logger.debug("Proctor cache MISS (invalidated)")
             self._del_cache_dict(request, params)
