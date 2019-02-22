@@ -59,6 +59,7 @@ default_if_none filter. This is typically the same text as inactive/control.
 """
 
 import collections
+import constants
 
 
 GroupAssignment = collections.namedtuple(
@@ -152,3 +153,29 @@ def extract_groups(api_response, defined_tests):
             group_dict[test_name] = _UNASSIGNED_GROUP
 
     return group_dict
+
+
+def extract_groups_with_cache(api_response, request, params, cache):
+    """
+        Create and return a dict of test name to GroupAssignment.
+
+        If api_response is None, force a reload from a cache since that is the next best option to
+        the truth before loading a default (None-like object for every
+        defined test). This guarantees that all defined_tests exist if the REST API
+        had an error.
+
+        api_response: the JSON response from the Proctor API in Python object form.
+        request: The request object
+        params: Proctor parameters object
+        cache: object holding the last retrieved test groups.
+        defined_tests: an iterable of test name strings defining the tests that
+            should be available to the user. Usually from Django settings.
+    """
+
+    if api_response is None:
+        request.__dict__[constants.FORCE_PROCTOR_CACHE_RELOAD] = True
+        group_dict = cache.get(request, params)
+        return group_dict if group_dict is not None else extract_groups(api_response, params.defined_tests)
+
+    return extract_groups(api_response, params.defined_tests)
+

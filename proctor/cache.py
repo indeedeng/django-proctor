@@ -12,6 +12,7 @@ import django.core.cache
 
 import api
 import groups
+import constants
 
 logger = logging.getLogger('application.proctor.cache')
 
@@ -157,6 +158,12 @@ class SessionCacher(Cacher):
         # This variable is PER-PROCESS!
         self.seen_matrix_version = None
         self.version_expiry_time = time.time()
+
+    def get(self, request, params):
+        force_proctor_cache_reload = request.__dict__.pop(constants.FORCE_PROCTOR_CACHE_RELOAD, None)
+        if force_proctor_cache_reload:
+            self.version_expiry_time = time.time() + self.version_timeout_seconds
+        return super(SessionCacher, self).get(request, params)
 
     def _get_cache_dict(self, request, params):
         return request.session.get(self._get_session_dict_key())
