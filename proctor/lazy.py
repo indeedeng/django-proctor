@@ -3,7 +3,6 @@ from __future__ import absolute_import, unicode_literals
 import six
 
 from . import groups
-from . import identify
 
 
 class LazyProctorGroups(groups.ProctorGroups):
@@ -33,6 +32,9 @@ class LazyProctorGroups(groups.ProctorGroups):
         """
         Replace lazy group_dict and attributes with real group assignments.
         """
+        # FIXME: Nested import to prevent circular import on `identify` module
+        from . import identify
+
         if self.loaded:
             # Don't double-load.
             return
