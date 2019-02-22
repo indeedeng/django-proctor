@@ -113,8 +113,8 @@ class ProctorGroups(object):
         non-Proctor-related groups before passing this list to your logger.
         """
         return [test_name + str(assignment.value)
-            for test_name, assignment in self._group_dict.iteritems()
-            if assignment is not _UNASSIGNED_GROUP and assignment.value >= 0]
+                for test_name, assignment in self._group_dict.iteritems()
+                if assignment is not _UNASSIGNED_GROUP and assignment.value >= 0]
 
 
 def extract_groups(api_response, defined_tests):
@@ -140,9 +140,9 @@ def extract_groups(api_response, defined_tests):
             # payload is hidden behind one of 'stringValue', 'longArray', etc.
             # Sometimes there is no payload.
             payload = (bucket_fields['payload'].popitem()[1]
-                if 'payload' in bucket_fields else None)
+                       if 'payload' in bucket_fields else None)
             assignment = GroupAssignment(group=bucket_fields['name'],
-                value=bucket_fields['value'], payload=payload)
+                                         value=bucket_fields['value'], payload=payload)
             group_dict[test_name] = assignment
         else:
             # The API doesn't include a response for unassigned tests.

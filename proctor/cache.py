@@ -30,7 +30,8 @@ class Cacher(object):
             new matrix version at least this often. Default: 5 minutes
         """
         self.version_timeout_seconds = (version_timeout_seconds
-            if version_timeout_seconds is not None else (5 * 60))
+                                        if version_timeout_seconds is not None
+                                        else (5 * 60))
 
     def get(self, request, params):
         """
@@ -57,14 +58,13 @@ class Cacher(object):
         # Make sure cache is invalidated if something changes.
         # If the test matrix changed, then assignments may have changed.
         # Parameters like forcegroups might change assignments too.
-        valid = (cache_matrix_version == latest_seen_version and
-            params == cache_params)
+        valid = (cache_matrix_version == latest_seen_version and params == cache_params)
         if valid:
             # ProctorGroups is a namedtuple serialized into a dict for JSON.
             # Need to convert it back before returning.
             logger.debug("Proctor cache HIT")
             return {key: groups.GroupAssignment(*val)
-                for key, val in group_dict.iteritems()}
+                    for key, val in group_dict.iteritems()}
         else:
             logger.debug("Proctor cache MISS (invalidated)")
             self._del_cache_dict(request, params)
@@ -106,8 +106,7 @@ class Cacher(object):
         self._set_latest_version(new_version)
 
         if latest_seen_version != new_version:
-            logger.debug("Proctor test matrix version changed to %s.",
-                new_version)
+            logger.debug("Proctor test matrix version changed to %s.", new_version)
             latest_seen_version = new_version
 
         return latest_seen_version
@@ -225,7 +224,7 @@ class CacheCacher(Cacher):
 
     def _set_latest_version(self, version):
         self.cache.set(self._get_cache_version_key(), version,
-            timeout=self.version_timeout_seconds)
+                       timeout=self.version_timeout_seconds)
 
     def _get_cache_key(self, params):
         prefix = self._get_cache_prefix()

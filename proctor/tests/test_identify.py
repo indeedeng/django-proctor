@@ -34,7 +34,7 @@ class TestIdentifyGroups:
 
         # When called twice
         identify.identify_groups(params, cacher=cacher, http=mock_requests)
-        groups = identify.identify_groups(params, cacher=cacher, http=mock_requests)
+        identify.identify_groups(params, cacher=cacher, http=mock_requests)
 
         # Then request only made once
         mock_requests.get.assert_called_once()
@@ -45,7 +45,7 @@ class TestIdentifyGroups:
 
         # When
         with patch_python_logger() as mock_logger:
-            groups = identify.identify_groups(params, http=mock_requests)
+            identify.identify_groups(params, http=mock_requests)
 
         # Then
         mock_logger.error.assert_called_once_with(ANY, ANY, 'missing groups field', ANY)
@@ -60,11 +60,10 @@ class TestIdentifyGroups:
 
         # When
         with patch_python_logger() as mock_logger:
-            groups = identify.identify_groups(params, http=mock_requests)
+            identify.identify_groups(params, http=mock_requests)
 
         # Then
         mock_logger.error.assert_called_once_with(ANY, ANY, ANY, ANY, 'scary message')
-
 
 
 class TestProcByAccountid:
@@ -83,7 +82,7 @@ def create_proctor_parameters(identifier_dict, defined_tests=None):
     params = api.ProctorParameters(
         api_root=settings.PROCTOR_API_ROOT,
         defined_tests=defined_tests,
-        context_dict={'ua':''},
+        context_dict={'ua': ''},
         identifier_dict=identifier_dict,
         force_groups=None,
     )
@@ -112,6 +111,7 @@ def mock_http_get_json(json_data, status_code=200):
     mock_requests.get.return_value = mock_response
 
     return mock_requests
+
 
 @contextmanager
 def patch_python_logger():
