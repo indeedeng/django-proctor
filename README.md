@@ -476,7 +476,7 @@ django-proctor was designed primarily for Django as that is the framework that w
 
 However, these modules would be usable in other Python frameworks with some minor modifications:
 
-api, cache*, groups, identify, lazy
+`api`, `cache*`, `groups`, `identify`, `lazy`
 
 cache unfortunately has some Django mixed in for some of its subclasses. It imports django.core.cache, it uses Django in subclasses, and the abstract Cacher interface takes `request` as a parameter (because `SessionCacher` needs it, but it can safely be None for all other subclasses).
 
@@ -485,6 +485,37 @@ Also, identify.py imports from django settings for similar reasons when looking 
 If this is a significant problem for you, ask us to split this into two packages: one for Python, and one for Django that has the former as a dependency. Or contribute a solution that splits the packages up.
 
 When implementing Proctor in other frameworks, use `middleware.py` to see how we implemented this for Django. We handle providing context variables and identifiers through subclassing. Other implementations could register functions (through decorators or otherwise) to provide these details. Also, note how the prforceGroups query parameter and cookie is handled.
+
+
+## Testing
+
+This project uses [`tox` for executing tests](https://tox.readthedocs.io/en/latest/). To run tests
+locally, cd into your project and run
+
+    $ tox
+
+Underneath the hood, `tox` is just running
+[`pytest` for test discovery and execution](https://docs.pytest.org/en/latest/). Test arguments can
+be passed through into `pytest` by adding `--` after your `tox` command. For example, you can
+isolate a test file or test method using the following:
+
+    $ tox -- proctor/tests/test_identify.py
+    $ tox -- proctor/tests/test_identify.py::TestIdentifyGroups::test_requested_group_resolved
+
+where `pytest` uses a double colon as a test class/method/function separator
+
+By default, `pytest` captures output, which prevents debugging with breakpoints. If you need to
+debug the tests, you can run either of the following:
+
+    $ tox -- --capture=no
+    $ tox -- -s
+
+You can then add a break point to a test by adding the following to your python code:
+
+```python
+import pdb; pdb.set_trace()
+```
+
 
 ## See Also
 

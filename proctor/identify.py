@@ -14,7 +14,7 @@ def identify_groups(params, cacher=None, request=None, lazy=False, http=None):
         Reduces the number of HTTP requests to the Proctor API. (default: None)
     request: The Django request. Only used if cacher is a cache.SessionCacher.
         (default: None)
-    http: An instance of requests.Session (or equivalent), used for making 
+    http: An instance of requests.Session (or equivalent), used for making
         http requests (default: None)
     lazy: A bool indicating whether group assignment should be lazy. If True,
         cache lookup and HTTP requests to the Proctor API are delayed until
@@ -51,18 +51,18 @@ def load_group_dict(params, cacher=None, request=None, http=None):
 
 def proc_by_accountid(accountid):
     """ Gets proctor groups by accountid
-    
+
     Args:
         accountid: typically the same id found in request.user.username
-    
+
     Returns:
         GroupAssignment
     """
-    identifier = {'account':accountid}
+    identifier = {'account': accountid}
     params = api.ProctorParameters(
                 api_root=settings.PROCTOR_API_ROOT,
                 defined_tests=settings.PROCTOR_TESTS,
-                context_dict={'ua':''},
+                context_dict={'ua': ''},
                 identifier_dict=identifier,
                 force_groups=None,
             )

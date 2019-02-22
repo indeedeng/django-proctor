@@ -8,3 +8,9 @@ atlassian-ide-plugin.xml
 *.iml
 current_version.txt
 ._.DS_Store
+
+.eggs
+*.egg-info
+
+.coverage
+.tox

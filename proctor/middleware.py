@@ -60,7 +60,7 @@ class BaseProctorMiddleware(object):
             # Cookie lasts until end of browser session.
             # forcegroups is for dev testing, don't want it to last forever.
             response.set_cookie(constants.PROP_NAME_FORCE_GROUPS,
-                value=request.GET[constants.PROP_NAME_FORCE_GROUPS])
+                                value=request.GET[constants.PROP_NAME_FORCE_GROUPS])
         return response
 
     def get_context(self, request):

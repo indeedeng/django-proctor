@@ -17,7 +17,7 @@ class LazyProctorGroups(groups.ProctorGroups):
         self._request = request
         self._http = http
         group_dict = {test: LazyGroupAssignment(self, test)
-            for test in params.defined_tests}
+                      for test in params.defined_tests}
         super(LazyProctorGroups, self).__init__(group_dict)
 
     def get_group_string_list(self):

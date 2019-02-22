@@ -22,8 +22,7 @@ class ProctorParameters(object):
     identifier_dict: Identifier source keys and their values.
     force_groups: prforceGroups string (from query param or cookie).
     """
-    def __init__(self, api_root, defined_tests, context_dict, identifier_dict,
-            force_groups):
+    def __init__(self, api_root, defined_tests, context_dict, identifier_dict, force_groups):
         self.api_root = api_root
         # Sometimes defined_tests is a tuple, which messes up equality testing.
         self.defined_tests = list(defined_tests)
@@ -33,17 +32,17 @@ class ProctorParameters(object):
 
     def as_dict(self):
         return {'api_root': self.api_root,
-            'defined_tests': self.defined_tests,
-            'context_dict': self.context_dict,
-            'identifier_dict': self.identifier_dict,
-            'force_groups': self.force_groups}
+                'defined_tests': self.defined_tests,
+                'context_dict': self.context_dict,
+                'identifier_dict': self.identifier_dict,
+                'force_groups': self.force_groups}
 
     def __eq__(self, other):
         return (self.api_root == other.api_root and
-            self.defined_tests == other.defined_tests and
-            self.context_dict == other.context_dict and
-            self.identifier_dict == other.identifier_dict and
-            self.force_groups == other.force_groups)
+                self.defined_tests == other.defined_tests and
+                self.context_dict == other.context_dict and
+                self.identifier_dict == other.identifier_dict and
+                self.force_groups == other.force_groups)
 
     def __ne__(self, other):
         return not (self == other)
@@ -81,9 +80,9 @@ def call_proctor(params, api_method=constants.API_METHOD_GROUPS_IDENTIFY, timeou
     http_params = {}
     # Context variables and identifiers need prefixes.
     http_params.update(('ctx.' + key, value)
-        for key, value in params.context_dict.iteritems())
+                       for key, value in params.context_dict.iteritems())
     http_params.update(('id.' + key, value)
-        for key, value in params.identifier_dict.iteritems())
+                       for key, value in params.identifier_dict.iteritems())
 
     # test is a comma-separated list of test names.
     # Always provide test. If not provided, Pipet returns all matrix tests.
@@ -105,13 +104,11 @@ def call_proctor(params, api_method=constants.API_METHOD_GROUPS_IDENTIFY, timeou
         logger.exception("Proctor API request to %s timed out.", api_url)
         return None
     except requests.exceptions.ConnectionError:
-        logger.exception("Proctor API request to %s had a connection error.",
-            api_url)
+        logger.exception("Proctor API request to %s had a connection error.", api_url)
         return None
     # All other Requests exceptions
     except requests.exceptions.RequestException:
-        logger.exception("Proctor API request to %s threw an exception.",
-            api_url)
+        logger.exception("Proctor API request to %s threw an exception.", api_url)
         return None
 
     if response.status_code != requests.codes.ok:
@@ -119,27 +116,27 @@ def call_proctor(params, api_method=constants.API_METHOD_GROUPS_IDENTIFY, timeou
         try:
             error_message = response.json()['meta']['error']
             logger.error("Proctor API at %s returned HTTP error (%d: %s) "
-                "with API error message: %s",
-                api_url, response.status_code, response.reason, error_message)
+                         "with API error message: %s",
+                         api_url, response.status_code, response.reason, error_message)
             return None
         # Response has no valid JSON. Maybe the HTTP server gave this error.
         except ValueError:
             logger.error("Proctor API at %s returned HTTP error (%d: %s)",
-                api_url, response.status_code, response.reason)
+                         api_url, response.status_code, response.reason)
             return None
         # Response had JSON, but it didn't use the envelope format.
         # The Proctor REST API should never cause this.
         except KeyError:
             logger.error("Proctor API at %s returned HTTP error (%d: %s) "
-                "and JSON with missing error message.",
-                api_url, response.status_code, response.reason)
+                         "and JSON with missing error message.",
+                         api_url, response.status_code, response.reason)
             return None
 
     try:
         api_response = response.json()
     except ValueError:
         logger.exception("Proctor API at %s returned invalid JSON: %s",
-            api_url, response.text)
+                         api_url, response.text)
         return None
 
     # The Proctor REST API should never return 200 without groups or tests.

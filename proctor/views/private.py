@@ -1,12 +1,10 @@
 from django.http import HttpResponse, Http404
 from django.conf import settings
 from django.views import generic
-from django.template import RequestContext
 from django.shortcuts import render
 
 from .. import api, constants, matrix, settings as local_settings
 import json
-import requests
 
 
 class ShowTestMatrixView(generic.View):
@@ -37,9 +35,8 @@ class ShowTestMatrixView(generic.View):
 
         data = matrix.identify_matrix(params, request=request)
 
-        return HttpResponse(
-            json.dumps(data, indent=2, separators=(',', ': ')), content_type='application/json;charset=UTF-8'
-        )
+        json_data = json.dumps(data, indent=2, separators=(',', ': '))
+        return HttpResponse(json_data, content_type='application/json;charset=UTF-8')
 
 
 class ForceGroupsView(generic.TemplateView):
@@ -59,7 +56,8 @@ class ForceGroupsView(generic.TemplateView):
         )
         test_matrix = matrix.identify_matrix(params, request=request)
 
-        your_groups = {test_name: assignment.value for test_name, assignment in request.proc._group_dict.iteritems()}
+        your_groups = {test_name: assignment.value
+                       for test_name, assignment in request.proc._group_dict.iteritems()}
 
         prforcegroups = self.get_prforcegroups(request)
 
@@ -70,7 +68,8 @@ class ForceGroupsView(generic.TemplateView):
             single_test_matrix = test_matrix["tests"].get(test, {})
             test_allocations = single_test_matrix.get("allocations", [])
             test_buckets = single_test_matrix.get("buckets", [])
-            test_ranges = self._get_test_ranges(next(iter(test_allocations), {}).get('ranges', []), test_buckets)
+            iter_test_ranges = next(iter(test_allocations), {}).get('ranges', [])
+            test_ranges = self._get_test_ranges(iter_test_ranges, test_buckets)
 
             allocations[test] = {
                 "buckets": test_buckets,
@@ -110,7 +109,7 @@ class ForceGroupsView(generic.TemplateView):
         # since this code is hit before the middleware sets the cookie, url params
         # will take precedence
         prforcegroups = request.GET.get(constants.PROP_NAME_FORCE_GROUPS, None)
-        if prforcegroups == None:
+        if prforcegroups is None:
             prforcegroups = request.COOKIES.get(constants.PROP_NAME_FORCE_GROUPS, '')
 
         return prforcegroups
