@@ -32,7 +32,7 @@ class Cacher(object):
         self.version_timeout_seconds = (version_timeout_seconds
             if version_timeout_seconds is not None else (5 * 60))
 
-    def get(self, request, params, force_reload=False):
+    def get(self, request, params, allow_expired=False):
         """
         Return the cached group_dict for the given ProctorParameters.
 
@@ -158,8 +158,8 @@ class SessionCacher(Cacher):
         self.seen_matrix_version = None
         self.version_expiry_time = time.time()
 
-    def get(self, request, params, force_reload=False):
-        if force_reload:
+    def get(self, request, params, allow_expired=False):
+        if allow_expired:
             self.version_expiry_time = time.time() + self.version_timeout_seconds
         return super(SessionCacher, self).get(request, params)
 
