@@ -12,7 +12,6 @@ import django.core.cache
 
 import api
 import groups
-import constants
 
 logger = logging.getLogger('application.proctor.cache')
 
@@ -33,7 +32,7 @@ class Cacher(object):
         self.version_timeout_seconds = (version_timeout_seconds
             if version_timeout_seconds is not None else (5 * 60))
 
-    def get(self, request, params):
+    def get(self, request, params, force_reload=False):
         """
         Return the cached group_dict for the given ProctorParameters.
 
@@ -159,9 +158,8 @@ class SessionCacher(Cacher):
         self.seen_matrix_version = None
         self.version_expiry_time = time.time()
 
-    def get(self, request, params):
-        force_proctor_cache_reload = request.__dict__.pop(constants.FORCE_PROCTOR_CACHE_RELOAD, None)
-        if force_proctor_cache_reload:
+    def get(self, request, params, force_reload=False):
+        if force_reload:
             self.version_expiry_time = time.time() + self.version_timeout_seconds
         return super(SessionCacher, self).get(request, params)
 

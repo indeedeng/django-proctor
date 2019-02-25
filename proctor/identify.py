@@ -41,7 +41,13 @@ def load_group_dict(params, cacher=None, request=None, http=None):
     if group_dict is None:
         # Cache miss or caching disabled.
         api_response = api.call_proctor_identify(params, http=http)
-        group_dict = groups.extract_groups_with_cache(api_response, request, params, cacher)
+        if api_response:
+            group_dict = groups.extract_groups(api_response, params.defined_tests)
+        else:
+            # If api request failed, attempt to force load from cache
+            group_dict = (cacher.get(request, params, force_reload=True)
+                          or groups.extract_groups(None, params.defined_tests))
+
         # Must cache the api response, but not if api had an error.
         if cacher is not None and api_response is not None:
             cacher.set(request, params, group_dict, api_response)
