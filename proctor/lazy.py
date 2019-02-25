@@ -1,5 +1,8 @@
-import groups
-import identify
+from __future__ import absolute_import, unicode_literals
+
+import six
+
+from . import groups
 
 
 class LazyProctorGroups(groups.ProctorGroups):
@@ -29,6 +32,9 @@ class LazyProctorGroups(groups.ProctorGroups):
         """
         Replace lazy group_dict and attributes with real group assignments.
         """
+        # FIXME: Nested import to prevent circular import on `identify` module
+        from . import identify
+
         if self.loaded:
             # Don't double-load.
             return
@@ -37,7 +43,7 @@ class LazyProctorGroups(groups.ProctorGroups):
             self._params, self._cacher, self._request, self._http)
 
         # Replace lazy attributes with loaded group assignments.
-        for test_name, assignment in self._group_dict.iteritems():
+        for test_name, assignment in six.iteritems(self._group_dict):
             # Don't overwrite anything we don't mean to.
             if isinstance(getattr(self, test_name), LazyGroupAssignment):
                 setattr(self, test_name, assignment)

@@ -1,10 +1,14 @@
+from __future__ import absolute_import, unicode_literals
+
+import json
+
+import six
 from django.http import HttpResponse, Http404
 from django.conf import settings
 from django.views import generic
 from django.shortcuts import render
 
 from .. import api, constants, matrix, settings as local_settings
-import json
 
 
 class ShowTestMatrixView(generic.View):
@@ -57,7 +61,7 @@ class ForceGroupsView(generic.TemplateView):
         test_matrix = matrix.identify_matrix(params, request=request)
 
         your_groups = {test_name: assignment.value
-                       for test_name, assignment in request.proc._group_dict.iteritems()}
+                       for test_name, assignment in six.iteritems(request.proc._group_dict)}
 
         prforcegroups = self.get_prforcegroups(request)
 

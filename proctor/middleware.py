@@ -1,10 +1,13 @@
+from __future__ import absolute_import, unicode_literals
+
+import six
 from django.conf import settings
 from django.core.exceptions import ImproperlyConfigured
 
-import api
-import cache
-import identify
-import constants
+from . import api
+from . import cache
+from . import identify
+from . import constants
 
 
 class BaseProctorMiddleware(object):
@@ -23,7 +26,7 @@ class BaseProctorMiddleware(object):
     def __init__(self):
         self.cacher = self.get_cacher()
 
-        if isinstance(settings.PROCTOR_TESTS, basestring):
+        if isinstance(settings.PROCTOR_TESTS, six.string_types):
             # User accidentally defined a string instead of tuple in settings.
             # PROCTOR_TESTS = (
             #     'buttoncolortst'
