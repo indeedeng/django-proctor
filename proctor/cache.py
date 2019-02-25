@@ -35,7 +35,7 @@ class Cacher(object):
                                         if version_timeout_seconds is not None
                                         else (5 * 60))
 
-    def get(self, request, params):
+    def get(self, request, params, allow_expired=False):
         """
         Return the cached group_dict for the given ProctorParameters.
 
@@ -158,6 +158,11 @@ class SessionCacher(Cacher):
         # This variable is PER-PROCESS!
         self.seen_matrix_version = None
         self.version_expiry_time = time.time()
+
+    def get(self, request, params, allow_expired=False):
+        if allow_expired:
+            self.version_expiry_time = time.time() + self.version_timeout_seconds
+        return super(SessionCacher, self).get(request, params)
 
     def _get_cache_dict(self, request, params):
         return request.session.get(self._get_session_dict_key())
