@@ -4,7 +4,7 @@ from contextlib import contextmanager
 
 import mock
 from django.conf import settings
-from mock import ANY
+from mock import ANY, patch
 
 from proctor import api
 from proctor import cache
@@ -40,6 +40,17 @@ class TestIdentifyGroups:
 
         # Then request only made once
         mock_requests.get.assert_called_once()
+
+    @patch('proctor.api.call_proctor_identify')
+    def test_cacher_is_none(self, mock_call_proctor_identify):
+        mock_call_proctor_identify.return_value = None
+        params = create_proctor_parameters({'account': 1234}, defined_tests=['fake_proctor_test'])
+
+        # Call load_group_dict with a cacher set to None (default)
+        group = identify.load_group_dict(params)
+
+        # There should be no exceptions raised and the group value should be the default
+        assert group['fake_proctor_test'].value is None
 
     def test_response_has_no_group_data(self):
         params = create_proctor_parameters({})
