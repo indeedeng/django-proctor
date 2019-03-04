@@ -48,7 +48,7 @@ def load_group_dict(params, cacher=None, request=None, http=None):
             group_dict = groups.extract_groups(api_response, params.defined_tests)
         else:
             # If api request failed, attempt to force load from cache
-            group_dict = (cacher.get(request, params, allow_expired=True)
+            group_dict = (cacher.get(request, params, allow_expired=True) if cacher else None
                           or groups.extract_groups(None, params.defined_tests))
 
         # Must cache the api response, but not if api had an error.
