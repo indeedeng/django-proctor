@@ -42,9 +42,9 @@ class TestIdentifyGroups:
         mock_requests.get.assert_called_once()
 
     @patch('proctor.api.call_proctor_identify')
-    def test_cacher_is_none(self, mock_call_proctor_identify):
+    def test_proctor_response_and_cacher_are_none(self, mock_call_proctor_identify):
         mock_call_proctor_identify.return_value = None
-        params = create_proctor_parameters({'account': 1234}, defined_tests=['fake_proctor_test'])
+        params = create_proctor_parameters({'account': 1234}, defined_tests=['fake_proctor_test'])git
 
         # Call load_group_dict with a cacher set to None (default)
         group = identify.load_group_dict(params)
