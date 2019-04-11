@@ -3,12 +3,12 @@ from __future__ import absolute_import, unicode_literals
 from contextlib import contextmanager
 
 import mock
-from django.conf import settings
 from mock import ANY, patch
 
 from proctor import api
 from proctor import cache
 from proctor import identify
+from proctor.tests.utils import create_proctor_parameters
 
 
 class TestIdentifyGroups:
@@ -44,7 +44,7 @@ class TestIdentifyGroups:
     @patch('proctor.api.call_proctor_identify')
     def test_proctor_response_and_cacher_are_none(self, mock_call_proctor_identify):
         mock_call_proctor_identify.return_value = None
-        params = create_proctor_parameters({'account': 1234}, defined_tests=['fake_proctor_test'])git
+        params = create_proctor_parameters({'account': 1234}, defined_tests=['fake_proctor_test'])
 
         # Call load_group_dict with a cacher set to None (default)
         group = identify.load_group_dict(params)
@@ -85,21 +85,6 @@ class TestProcByAccountid:
         groups = identify.proc_by_accountid(1234)
         assert groups.fake_proctor_test_in_settings.value is None
         assert groups.fake_proctor_test_in_settings.group is None
-
-
-# TODO: This function can probably be removed to `api` or `identify` module
-def create_proctor_parameters(identifier_dict, defined_tests=None):
-    if defined_tests is None:
-        defined_tests = settings.PROCTOR_TESTS
-
-    params = api.ProctorParameters(
-        api_root=settings.PROCTOR_API_ROOT,
-        defined_tests=defined_tests,
-        context_dict={'ua': ''},
-        identifier_dict=identifier_dict,
-        force_groups=None,
-    )
-    return params
 
 
 def mock_http_get_data(group_data=None, added_data=None, status_code=200):

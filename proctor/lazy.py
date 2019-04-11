@@ -42,12 +42,13 @@ class LazyProctorGroups(groups.ProctorGroups):
         self._group_dict = identify.load_group_dict(
             self._params, self._cacher, self._request, self._http)
 
-        # Replace lazy attributes with loaded group assignments.
-        for test_name, assignment in six.iteritems(self._group_dict):
-            # Don't overwrite anything we don't mean to.
-            if isinstance(getattr(self, test_name), LazyGroupAssignment):
-                setattr(self, test_name, assignment)
-        self.loaded = True
+        if self._group_dict:
+            # Replace lazy attributes with loaded group assignments.
+            for test_name, assignment in six.iteritems(self._group_dict):
+                # Don't overwrite anything we don't mean to.
+                if isinstance(getattr(self, test_name), LazyGroupAssignment):
+                    setattr(self, test_name, assignment)
+            self.loaded = True
 
 
 class LazyGroupAssignment(object):
