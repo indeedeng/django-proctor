@@ -60,6 +60,7 @@ default_if_none filter. This is typically the same text as inactive/control.
 from __future__ import absolute_import, unicode_literals
 
 import collections
+import numbers
 
 import six
 
@@ -117,7 +118,9 @@ class ProctorGroups(object):
         """
         return [test_name + str(assignment.value)
                 for test_name, assignment in six.iteritems(self._group_dict)
-                if assignment is not _UNASSIGNED_GROUP and assignment.value >= 0]
+                if assignment is not _UNASSIGNED_GROUP and 
+                    isinstance(assignment.value, numbers.Number) and 
+                    assignment.value >= 0]
 
 
 def extract_groups(api_response, defined_tests):
