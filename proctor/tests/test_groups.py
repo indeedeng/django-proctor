@@ -17,7 +17,4 @@ class TestProctorGroups:
 
     def test_string_encoding_for_inactive_group(self):
         groups = ProctorGroups({"test_two": GroupAssignment(group=None, value=-1, payload=None)})
-        assert groups.get_group_string_list() == ["test_two-1"]
-
-
-
+        assert groups.get_group_string_list() == []
