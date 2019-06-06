@@ -1,0 +1,4 @@
+include README.md
+include LICENSE.txt
+graft proctor/templates
+graft proctor/static

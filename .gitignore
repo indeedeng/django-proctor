@@ -12,5 +12,8 @@ current_version.txt
 .eggs
 *.egg-info
 
+build/
+dist/
+
 .coverage
 .tox
