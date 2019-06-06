@@ -17,4 +17,4 @@ class TestLazyProctorGroups:
         try:
             lazy_proctor_groups.load()
         except AttributeError:
-            pytest.fail("Attribute error thrown on proctor group load when loading with self._group_dict == None")
+            pytest.fail("Attribute error thrown when loading with self._group_dict == None")
