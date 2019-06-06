@@ -118,9 +118,9 @@ class ProctorGroups(object):
         """
         return [test_name + str(assignment.value)
                 for test_name, assignment in six.iteritems(self._group_dict)
-                if assignment is not _UNASSIGNED_GROUP and 
-                    isinstance(assignment.value, numbers.Number) and 
-                    assignment.value >= 0]
+                if (assignment is not _UNASSIGNED_GROUP and
+                    isinstance(assignment.value, numbers.Number) and
+                    assignment.value >= 0)]
 
 
 def extract_groups(api_response, defined_tests):
