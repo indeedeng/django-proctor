@@ -1,5 +1,6 @@
 # django-proctor
 
+![NetflixOSS Lifecycle](https://img.shields.io/osslifecycle/indeedeng/django-proctor.svg)
 
 django-proctor allows you to use [Proctor](https://github.com/indeedeng/proctor) (an A/B testing framework) from Django by using [Proctor Pipet](https://github.com/indeedeng/proctor-pipet), which exposes Proctor as a simple REST API.
 
@@ -532,3 +533,9 @@ import pdb; pdb.set_trace()
 * [Proctor Blog Post](http://engineering.indeed.com/blog/2014/06/proctor-a-b-testing-framework/) on the Indeed Engineering blog.
 
 * [Proctor Tech Talk](http://engineering.indeed.com/talks/managing-experiments-behavior-dynamically-proctor/)
+
+## Code of Conduct
+This project is governed by the [Contributor Covenant v 1.4.1](CODE_OF_CONDUCT.md)
+
+## License
+This project uses the [Apache 2.0](LICENSE.txt) license.
