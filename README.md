@@ -1,6 +1,6 @@
 # django-proctor
 
-![NetflixOSS Lifecycle](https://img.shields.io/osslifecycle/indeedeng/django-proctor.svg)
+![OSS Lifecycle](https://img.shields.io/osslifecycle/indeedeng/django-proctor.svg)
 
 django-proctor allows you to use [Proctor](https://github.com/indeedeng/proctor) (an A/B testing framework) from Django by using [Proctor Pipet](https://github.com/indeedeng/proctor-pipet), which exposes Proctor as a simple REST API.
 
