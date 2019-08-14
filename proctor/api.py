@@ -5,7 +5,7 @@ import socket
 
 import requests
 import six
-
+from tenacity import retry, stop_after_attempt
 from . import constants
 
 logger = logging.getLogger('application.proctor.api')
@@ -51,22 +51,28 @@ class ProctorParameters(object):
         return not (self == other)
 
 
-def call_proctor_identify(params, timeout=1.0, http=None):
+@retry(stop=stop_after_attempt(constants.MAX_HTTP_RETRIES), reraise=True)
+def _get_with_retries(http, api_url, http_params, timeout):
+    return http.get(api_url, params=http_params, timeout=timeout)
+
+
+def call_proctor_identify(params, timeout=constants.MAX_HTTP_TIMEOUT_SECONDS, http=None):
     return call_proctor(params, constants.API_METHOD_GROUPS_IDENTIFY, timeout, http)
 
 
-def call_proctor_matrix(params, timeout=1.0, http=None):
+def call_proctor_matrix(params, timeout=constants.MAX_HTTP_TIMEOUT_SECONDS, http=None):
     return call_proctor(params, constants.API_METHOD_PROCTOR_MATRIX, timeout, http)
 
 
-def call_proctor(params, api_method=constants.API_METHOD_GROUPS_IDENTIFY, timeout=1.0, http=None):
+def call_proctor(params, api_method=constants.API_METHOD_GROUPS_IDENTIFY,
+                 timeout=constants.MAX_HTTP_TIMEOUT_SECONDS, http=None):
     """
     Make an HTTP request to the Proctor REST API /groups/identify endpoint.
 
     Return the JSON API response or None if there was an error.
 
     params: Instance of ProctorParameters.
-    timeout: Timeout of the HTTP request in seconds. (default: 1.0 seconds)
+    timeout: Timeout of the HTTP request in seconds. (default: 0.25 seconds)
         If None, requests will attempt the request forever.
         For network unreachable errors, requests inexplicably takes ~20x this
         value before returning.
@@ -96,7 +102,7 @@ def call_proctor(params, api_method=constants.API_METHOD_GROUPS_IDENTIFY, timeou
 
     try:
         logger.debug("Calling Proctor API: %s with %s", api_url, http_params)
-        response = http.get(api_url, params=http_params, timeout=timeout)
+        response = _get_with_retries(http, api_url, http_params, timeout)
 
     # Handle all possible errors.
     # This may be running in production, and Proctor is not critical,

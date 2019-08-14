@@ -11,7 +11,7 @@ with open(path.join(here, 'README.md')) as f:
 
 setup(
     name='django-proctor',
-    version='1.0.4',
+    version='1.0.5',
     description="Django library for interacting with the Proctor A/B testing framework",
     long_description=long_description,
     long_description_content_type='text/markdown',
@@ -36,6 +36,7 @@ setup(
         'ndg-httpsclient',
         'pyOpenSSL',
         'requests',
+        'tenacity>=4.8.0',
     ],
     zip_safe=False,
 )
