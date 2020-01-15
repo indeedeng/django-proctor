@@ -3,6 +3,7 @@ from __future__ import absolute_import, unicode_literals
 import six
 from django.conf import settings
 from django.core.exceptions import ImproperlyConfigured
+from django.utils.deprecation import MiddlewareMixin
 
 from . import api
 from . import cache
@@ -10,7 +11,7 @@ from . import identify
 from . import constants
 
 
-class BaseProctorMiddleware(object):
+class BaseProctorMiddleware(MiddlewareMixin):
     """
     Middleware that gets all Proctor test group assignments via the REST API.
 
@@ -23,7 +24,8 @@ class BaseProctorMiddleware(object):
     Detects 'prforceGroups' in the request and sets cookies appropriately.
     """
 
-    def __init__(self):
+    def __init__(self, get_response=None):
+        super(BaseProctorMiddleware, self).__init__(get_response)
         self.cacher = self.get_cacher()
 
         if isinstance(settings.PROCTOR_TESTS, six.string_types):

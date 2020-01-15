@@ -122,7 +122,7 @@ This method is always run after any previous middleware.
 def get_identifiers(self, request):
     ids = {'USER': request.COOKIES.get('tracking')}
 
-    if request.user.is_authenticated():
+    if request.user.is_authenticated:
         ids['acctid'] = request.user.id
 
     return ids
@@ -143,7 +143,7 @@ This method is always run after any previous middleware.
 ```py
 def get_context(self, request):
     return {"ua": request.META.get('HTTP_USER_AGENT', ''),
-            "loggedIn": request.user.is_authenticated(),
+            "loggedIn": request.user.is_authenticated,
             "country": geo.country(request.get_host()),
     }
 ```
@@ -177,9 +177,9 @@ If you don't override this method, it returns None, which will cause the api to 
 
 You must set several things in your `settings.py` for django-proctor to work properly:
 
-#### MIDDLEWARE_CLASSES
+#### MIDDLEWARE
 
-Add the middleware you created to `MIDDLEWARE_CLASSES`. Make sure you place it after any middleware it depends on like `AuthenticationMiddleware`.
+Add the middleware you created to `MIDDLEWARE`. Make sure you place it after any middleware it depends on like `AuthenticationMiddleware`.
 
 #### TEMPLATE_CONTEXT_PROCESSORS
 
