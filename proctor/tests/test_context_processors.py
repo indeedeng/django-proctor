@@ -1,9 +1,5 @@
 from unittest import TestCase
-
-try:
-    from unittest.mock import Mock
-except ImportError:
-    from mock import Mock
+from mock import Mock
 
 from proctor import context_processors
 
