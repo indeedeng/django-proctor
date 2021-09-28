@@ -11,7 +11,7 @@ with open(path.join(here, 'README.md')) as f:
 
 setup(
     name='django-proctor',
-    version='1.1.0',
+    version='1.2.1',
     description="Django library for interacting with the Proctor A/B testing framework",
     long_description=long_description,
     long_description_content_type='text/markdown',
