@@ -1,0 +1,22 @@
+name: tox
+on: [push, pull_request]
+jobs:
+  tox:
+    strategy:
+      fail-fast: false
+      matrix:
+        job: [py36-django111, py36-django22, py39-django111, py39-django22]
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v3
+      - if: ${{ startswith(matrix.job, 'py36') }}
+        uses: actions/setup-python@v4
+        with:
+          python-version: 3.6
+      - if: ${{ startswith(matrix.job, 'py39') }}
+        uses: actions/setup-python@v4
+        with:
+          python-version: 3.9
+      - run: pip install --upgrade pip
+      - run: pip install tox
+      - run: tox -e ${{ matrix.job }}

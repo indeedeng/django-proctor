@@ -91,7 +91,7 @@ Using the above url pattern example, the test matrix would be available at `http
 
 The Force Groups view allows you to see what the current group assignments are for your session and identification and force yourself into a specific group for any test.
 
-**NOTE**: This template does come with a default base template, but it can be overidden. To override the default base template, you must have a base template to extend and the name of that template file should be set in PROCTOR_BASE_TEMPLATE.
+**NOTE**: This template does come with a default base template, but it can be overridden. To override the default base template, you must have a base template to extend and the name of that template file should be set in PROCTOR_BASE_TEMPLATE.
 
 Using the above url pattern example, the force groups page would be available at `http://<your_project_root>/private/proctor/force`.
 
